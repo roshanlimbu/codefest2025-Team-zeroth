@@ -49,7 +49,6 @@ model User {
   sessions     Session[]
   campaigns    Campaign[]
 
-  media        CampaignMedia[]
   links        CampaignLink[]
   milestones   CampaignMilestone[]
 }
@@ -81,7 +80,7 @@ model Campaign {
   updatedAt   DateTime         @updatedAt
 
   creator     User             @relation(fields: [creatorId], references: [id])
-  media       CampaignMedia[]
+  media       Json
   links       CampaignLink[]
   milestones  CampaignMilestone[]
 
@@ -89,21 +88,14 @@ model Campaign {
   @@index([status])
 }
 
-model CampaignMedia {
-  id         String   @id @default(cuid())
-  campaignId String
-  userId     String
 
-  url        String
-  type       String
-
-  createdAt  DateTime @default(now())
-
-  campaign   Campaign @relation(fields: [campaignId], references: [id])
-  user       User     @relation(fields: [userId], references: [id])
-
-  @@index([campaignId])
+model MileStoneReport {
+    id           String   @id @default(cuid())
+    milestoneId  String
+    reportDescription String
+    reportUrl    Json
 }
+
 
 model CampaignLink {
   id         String   @id @default(cuid())
@@ -135,6 +127,9 @@ model CampaignMilestone {
 
   campaign    Campaign @relation(fields: [campaignId], references: [id])
   user        User     @relation(fields: [userId], references: [id])
+  target      BigInt @default(0)
+  raisedAmount BigInt @default(0)
+
 
   @@index([campaignId])
 }

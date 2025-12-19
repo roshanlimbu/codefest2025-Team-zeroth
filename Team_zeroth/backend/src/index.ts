@@ -14,19 +14,27 @@ app.use(cookieParser());
 // Configure CORS to allow credentials (cookies)
 app.use(cors({
     origin: function (origin, callback) {
-        // Allow requests from localhost and the frontend origin
-        const allowedOrigins = [
-            'http://localhost:5173',
-            'http://localhost:3000',
-            'http://localhost:5174',
-            'http://localhost:8000',
-        ];
-
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
+        // In development, allow any localhost or local network origin
+        if (process.env.NODE_ENV !== 'production') {
+            // Allow any localhost port or local network IP (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
+            if (!origin || 
+                origin.startsWith('http://localhost:') || 
+                origin.startsWith('http://127.0.0.1:') ||
+                /^http:\/\/(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)/.test(origin)) {
+                callback(null, true);
+            } else {
+                console.log(`CORS blocked origin: ${origin}`);
+                callback(new Error('CORS not allowed'));
+            }
         } else {
-            console.log(`CORS blocked origin: ${origin}`);
-            callback(new Error('CORS not allowed'));
+            // In production, use specific allowed origins from env variable
+            const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                console.log(`CORS blocked origin: ${origin}`);
+                callback(new Error('CORS not allowed'));
+            }
         }
     },
     credentials: true,

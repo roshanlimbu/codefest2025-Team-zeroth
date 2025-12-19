@@ -115,8 +115,30 @@ export const auth = {
             console.error('[LOGIN] Error during login:', err);
             next(err);
         }
-    }
+    }, 
+    logOut: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            console.log('[LOGOUT] Starting logout request...');
+            const sessionId = req.cookies[COOKIE_NAME];
+            if (!sessionId) return res.status(400).json({ error: 'No active session found' });
 
+            console.log('[LOGOUT] Invalidating session in DB...');
+            await prisma.session.deleteMany({ where: { id: sessionId } });
+
+            console.log('[LOGOUT] Clearing session cookie...');
+            res.cookie(COOKIE_NAME, '', {
+                httpOnly: true,
+                sameSite: 'lax',
+                secure: false, // TODO: set to true when using HTTPS
+                maxAge: 0,
+            });
+
+            return res.json({ message: 'Logged out' });
+        } catch (err) {
+            console.error('[LOGOUT] Error during logout:', err);
+            next(err);
+        }
+    }
 }
 
 

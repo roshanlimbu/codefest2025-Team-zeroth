@@ -1,7 +1,14 @@
-import axios from "axios";
+const getBaseURL = () => {
+    if (import.meta.env.VITE_API_BASE_URL) {
+        return import.meta.env.VITE_API_BASE_URL;
+    }
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    return `${protocol}//${hostname}:8080`;
+};
 
 const axiosClient = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
+    baseURL: getBaseURL(),
     withCredentials: true,
     headers: {
         "Content-Type": "application/json",

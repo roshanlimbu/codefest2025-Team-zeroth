@@ -6,7 +6,7 @@
     "dev": "tsc --watch",
     "build": "prisma generate && tsc",
     "start": "nodemon dist/index.js",
-    "mailer": "node src/services/mailer.js"
+    "mailer": "nodemon src/services/mailer.js"
   },
   "keywords": [],
   "author": "",

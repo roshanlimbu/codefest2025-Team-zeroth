@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Users, Check, Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { registerUser } from '../api/authApi';
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -12,10 +13,34 @@ export default function SignupPage() {
     confirmPassword: ''
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Form submitted:', formData);
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!agreedToTerms) {
+    alert("You must agree to terms & conditions");
+    return;
+  }
+
+  if (formData.password !== formData.confirmPassword) {
+    alert("Passwords do not match");
+    return;
+  }
+
+  try {
+    const res = await registerUser({
+      name: formData.fullName,
+      email: formData.email,
+      password: formData.password
+    });
+    console.log("Register response:", res);
+    alert("OTP sent! Check your email.");
+    // Optionally show OTP input here
+  } catch (err) {
+    console.error(err);
+    alert(err?.response?.data?.error || "Registration failed");
+  }
+};
+
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));

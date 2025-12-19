@@ -11,6 +11,7 @@ const CAMPAIGN_CREATE_ROUTE = "/campaign/create";
 const MILESTONE_VERIFICATION_ROUTE = "/milestone/verification";
 const CAMPAIGN_ROUTE = "/campaigns"
 const DONATION_ROUTE = "/donation"
+const OTPVERIFY_ROUTE = "/auth/otp-verify"
 const KYC_ROUTE = "/kyc/verify"
 
 // Export the routes
@@ -27,5 +28,6 @@ export {
     MILESTONE_VERIFICATION_ROUTE,
     CAMPAIGN_ROUTE,
     DONATION_ROUTE,
-    KYC_ROUTE
+    KYC_ROUTE,
+    OTPVERIFY_ROUTE
 };

@@ -41,7 +41,11 @@ model User {
   isVerified   Boolean  @default(false)
   type         UserType @default(USER)
   kycVerified  Boolean  @default(false)
-
+  
+  // KYC Data
+  phoneNumber  String?
+  kycDocuments Json?    // Stores citizenship, passport, photo, signature URLs
+  kycSubmittedAt DateTime?
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -139,3 +143,6 @@ model Item {
   name      String
   createdAt DateTime @default(now())
 }
+
+
+

@@ -8,6 +8,8 @@ import {
     REGISTER_ROUTE,
     DASHBOARD_ROUTE,
     KYC_ROUTE,
+    DONATION_ROUTE,
+    OTPVERIFY_ROUTE,
 } from "./constant/routes";
 
 import HomePage from "./pages/HomePage";
@@ -18,6 +20,8 @@ import MainLayout from "./layouts/MainLayout";
 import UnAuthLayout from "./layouts/UnAuthLayout";
 import AuthPages from "./components/Login";
 import SignupPage from "./components/Signup";
+import DonationPage from "./pages/DonationPage";
+import OTPVerificationPage from "./pages/OTPVerificationPage";
 
 // Temporary local auth check
 const isAuthenticated = () => {
@@ -28,29 +32,34 @@ const isAuthenticated = () => {
 };
 
 const router = createBrowserRouter([
-    // Public Pages
-    {
-        element: <MainLayout />,
-        children: [
-            // { path: `${HOME_ROUTE}/:id`, element: <DonationPage /> },
-            { path: HOME_ROUTE, element: <HomePage /> },
-            { path: KYC_ROUTE, element: <KYCPage /> },
-        ]
-    },
-    {
-        element: <UnAuthLayout />,
-        children: [
-            {
-                path: LOGIN_ROUTE,
-                element: !isAuthenticated() ? <AuthPages /> : <Navigate to={DASHBOARD_ROUTE} />
-            },
-            {
-                path: REGISTER_ROUTE,
-                element: !isAuthenticated() ? <SignupPage /> : <Navigate to={DASHBOARD_ROUTE} />
-            }
-        ]
-    },
-    // Protected pages
+  // Public Pages
+  {
+    element: <MainLayout />,
+    children: [
+      // { path: `${HOME_ROUTE}/:id`, element: <DonationPage /> },
+      { path: HOME_ROUTE, element: <HomePage /> },
+      { path: `${DONATION_ROUTE}/:id`, element: <DonationPage /> },
+      { path: KYC_ROUTE, element: <KYCPage /> }
+    ]
+  },
+  {
+    element: <UnAuthLayout />,
+    children: [
+      {
+        path: LOGIN_ROUTE,
+        element: !isAuthenticated() ? <AuthPages /> : <Navigate to={DASHBOARD_ROUTE} />
+      },
+      {
+        path: REGISTER_ROUTE,
+        element: !isAuthenticated() ? <SignupPage /> : <Navigate to={DASHBOARD_ROUTE} />
+      },
+      {
+        path: OTPVERIFY_ROUTE,
+        element: <OTPVerificationPage />
+      }
+    ]
+  },
+  // Protected pages
 
     // 404 fallback
     { path: "*", element: <PageNotFound /> }

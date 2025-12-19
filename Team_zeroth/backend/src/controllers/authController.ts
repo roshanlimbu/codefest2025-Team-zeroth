@@ -32,8 +32,10 @@ export const auth = {
             pendingRegistrations.set(email, { name, password: hashed, expiresAt });
 
             return res.status(201).json({ message: 'OTP sent. Complete verification to finish registration.' });
-        } catch (err) {
-            next(err);
+        } catch (err:any) {
+            console.error('AXIOS ERROR:', err.cause || err);
+            throw err;
+            // next(err);
         }
     },
     verifyOTP :  async (req: Request, res: Response, next: NextFunction) => {
@@ -138,7 +140,28 @@ export const auth = {
             console.error('[LOGOUT] Error during logout:', err);
             next(err);
         }
+    },
+
+    verifyKYC: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+
+            const {userId} = req.body;
+            const userExists = await prisma.user.findUnique({ where: { id: userId } });
+            if (!userExists) return res.status(404).json({ error: 'User not found' });
+
+
+            await prisma.user.update({where: { id: userId }, data: { kycVerified: true } });
+
+
+
+        } catch (err) {
+            console.error('[VERIFY_KYC] Error during KYC verification:', err);
+            next(err);
+        }
+
     }
+
+
 }
 
 

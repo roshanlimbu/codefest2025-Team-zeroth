@@ -3,7 +3,7 @@ import nodemailer from "nodemailer";
 import 'dotenv/config';
 
 const app = express();
-const PORT = 8081;
+const PORT = process.env.MAILER_PORT;
 
 app.use(express.json());
 

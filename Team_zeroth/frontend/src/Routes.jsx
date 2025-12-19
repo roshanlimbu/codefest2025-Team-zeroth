@@ -10,6 +10,9 @@ import {
     KYC_ROUTE,
     DONATION_ROUTE,
     OTPVERIFY_ROUTE,
+    CAMPAIGN_ROUTE,
+    CAMPAIGN_CREATE_ROUTE,
+    MILESTONE_VERIFICATION_ROUTE,
 } from "./constant/routes";
 
 import HomePage from "./pages/HomePage";
@@ -18,10 +21,15 @@ import KYCPage from "./pages/KYCPage";
 
 import MainLayout from "./layouts/MainLayout";
 import UnAuthLayout from "./layouts/UnAuthLayout";
-import AuthPages from "./components/Login";
 import SignupPage from "./components/Signup";
 import DonationPage from "./pages/DonationPage";
 import OTPVerificationPage from "./pages/OTPVerificationPage";
+import AuthLayout from "./layouts/AuthLayout";
+import CreateProjectPage from "./pages/CreateProjectPage";
+import Login from "./components/Login";
+import DashboardPage from "./pages/DashboardPage";
+import MilestoneVerification from "./pages/MilestoneVerification";
+import CampaignsPage from "./pages/CampaignsPage";
 
 const Dashboard = () => (
     <div className="p-8">
@@ -35,7 +43,7 @@ const isAuthenticated = () => {
     // Use localStorage token for demo; replace with Redux or context later
     // const authToken = localStorage.getItem("auth_token");
     // return !!authToken;
-    return false
+    return true
 };
 
 const router = createBrowserRouter([
@@ -43,11 +51,12 @@ const router = createBrowserRouter([
     {
         element: <MainLayout />,
         children: [
-            // { path: `${HOME_ROUTE}/:id`, element: <DonationPage /> },
             { path: HOME_ROUTE, element: <HomePage /> },
             { path: `${DONATION_ROUTE}/:id`, element: <DonationPage /> },
             { path: KYC_ROUTE, element: <KYCPage /> },
-            { path: DASHBOARD_ROUTE, element: <Dashboard /> }
+            { path: DASHBOARD_ROUTE, element: <Dashboard /> },
+            { path: CAMPAIGN_ROUTE, element: <CampaignsPage /> }
+
         ]
     },
     {
@@ -55,7 +64,7 @@ const router = createBrowserRouter([
         children: [
             {
                 path: LOGIN_ROUTE,
-                element: !isAuthenticated() ? <AuthPages /> : <Navigate to={DASHBOARD_ROUTE} />
+                element: !isAuthenticated() ? <Login /> : <Navigate to={DASHBOARD_ROUTE} />
             },
             {
                 path: REGISTER_ROUTE,
@@ -68,6 +77,23 @@ const router = createBrowserRouter([
         ]
     },
     // Protected pages
+  {
+    element: <AuthLayout />,
+    children: [
+      {
+        path: DASHBOARD_ROUTE,
+        element: isAuthenticated() ? <DashboardPage /> : <Navigate to={LOGIN_ROUTE} />
+      },
+      {
+        path: CAMPAIGN_CREATE_ROUTE,
+        element: isAuthenticated() ? <CreateProjectPage /> : <Navigate to={LOGIN_ROUTE} />
+      },
+      {
+        path: MILESTONE_VERIFICATION_ROUTE,
+        element: isAuthenticated() ? <MilestoneVerification /> : <Navigate to={LOGIN_ROUTE} />
+      }
+    ]
+  },
 
     // 404 fallback
     { path: "*", element: <PageNotFound /> }

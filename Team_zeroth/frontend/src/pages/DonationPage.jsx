@@ -3,9 +3,9 @@ import { DonationProvider } from "../context/DonationContext"
 import { campaignsData } from "../data/campaignData"
 import CampaignHero from "../components/donation/CampaignHero"
 import BeneficiaryProfile from "../components/donation/BeneficiaryProfile"
-import DisasterOverview from "../components/donation/DisasterOverview"
 import MilestoneProgressSection from "../components/donation/MilestoneProgressSection"
 import DonationForm from "../components/donation/DonationForm"
+import CampaignOverview from "../components/donation/CampaignOverview"
 
 const DonationPage = () => {
   const { id: campaignId } = useParams()
@@ -38,7 +38,7 @@ const DonationPage = () => {
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
               <BeneficiaryProfile />
-              <DisasterOverview />
+              <CampaignOverview />
               <MilestoneProgressSection />
             </div>
 

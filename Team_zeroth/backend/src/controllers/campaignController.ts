@@ -1,28 +1,8 @@
 
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../prisma.js';
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
 import { CampaignCategory, CampaignStatus } from '../../generated/prisma/index.js';
-
-
-const uploadDir = 'uploads';
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
-
-export const upload = multer({ storage: storage });
+import { upload } from '../services/multer.js';
 
 
 export const campaignController = {

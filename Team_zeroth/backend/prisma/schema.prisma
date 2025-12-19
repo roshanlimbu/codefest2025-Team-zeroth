@@ -1,11 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
@@ -13,31 +7,130 @@ datasource db {
   provider = "mysql"
 }
 
+enum CampaignCategory {
+  MEDICAL
+  DISASTER
+  EDUCATION
+  HOUSING
+  LIVELIHOOD
+  OTHER
+}
+
+enum CampaignStatus {
+  DRAFT
+  SUBMITTED
+  VERIFIED
+  LIVE
+  PAUSED
+  COMPLETED
+  REJECTED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  password     String
+  isVerified   Boolean  @default(false)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sessions     Session[]
+  campaigns    Campaign[]
+
+  media        CampaignMedia[]
+  links        CampaignLink[]
+  milestones   CampaignMilestone[]
+}
 
 model Session {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
   csrfToken String
-  createdAt DateTime @default(now())
   expiresAt DateTime
+
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
-model User {
+model Campaign {
+  id          String           @id @default(uuid())
+  creatorId   String
+
+  title       String
+  category    CampaignCategory
+  location    String
+  description String
+  status      CampaignStatus   @default(DRAFT)
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  creator     User             @relation(fields: [creatorId], references: [id])
+  media       CampaignMedia[]
+  links       CampaignLink[]
+  milestones  CampaignMilestone[]
+
+  @@index([creatorId])
+  @@index([status])
+}
+
+model CampaignMedia {
   id         String   @id @default(cuid())
-  name       String
-  email      String   @unique
-  password   String
-  isVerified  Boolean  @default(false)
+  campaignId String
+  userId     String
+
+  url        String
+  type       String
+
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  sessions   Session[]
+
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@index([campaignId])
 }
 
+model CampaignLink {
+  id         String   @id @default(cuid())
+  campaignId String
+  userId     String
+
+  label      String
+  url        String
+
+  createdAt  DateTime @default(now())
+
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@index([campaignId])
+}
+
+model CampaignMilestone {
+  id          String   @id @default(cuid())
+  campaignId  String
+  userId      String
+
+  title       String
+  description String
+  targetDate  DateTime
+  isCompleted Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+
+  campaign    Campaign @relation(fields: [campaignId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@index([campaignId])
+}
 
 model Item {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
 }
-

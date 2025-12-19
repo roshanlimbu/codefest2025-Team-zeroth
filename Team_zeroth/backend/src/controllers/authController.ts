@@ -207,9 +207,10 @@ export const auth = {
 
             res.cookie(COOKIE_NAME, sessionId, {
                 httpOnly: true,
-                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-                secure: process.env.NODE_ENV === 'production' ? true : false,
+                sameSite: 'strict',
+                secure: false,
                 maxAge: SESSION_TTL_MINUTES * 60 * 1000,
+                path: '/',
             });
 
             return res.json({ message: 'Logged in', csrfToken });
@@ -230,7 +231,7 @@ export const auth = {
 
             res.cookie(COOKIE_NAME, '', {
                 httpOnly: true,
-                sameSite: 'lax',
+                sameSite: 'none',
                 secure: false,
                 maxAge: 0,
             });

@@ -21,4 +21,4 @@ const authMenu = [
     { route: REGISTER_ROUTE, label: "Sign Up" }
 ];
 
-export { navMenu, authMenu, campaignMenu };
+export { navMenu, authMenu };

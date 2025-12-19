@@ -1,7 +1,7 @@
 const LivePreviewCard = ({ projectData, uploadedFiles, milestones }) => {
   return (
     <div className="lg:col-span-1">
-      <div className="sticky top-6">
+      <div className="sticky top-18">
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
           <div className="p-6 space-y-4">
             <h3 className="text-lg font-bold text-gray-900">Live Preview</h3>

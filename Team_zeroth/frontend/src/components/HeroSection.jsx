@@ -9,11 +9,6 @@ const features = [
     description: "Advanced AI ensures every victim and milestone is rigorously validated.",
   },
   {
-    icon: Link2,
-    title: "Blockchain Transparency",
-    description: "Track every donation from contributor to impact, securely and openly.",
-  },
-  {
     icon: Award,
     title: "Milestone-Based Funding",
     description: "Funds are released only as verified progress milestones are achieved.",
@@ -111,6 +106,58 @@ const HeroSection = () => {
                 <p className="text-gray-500 text-sm">{feature.description}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Stats */}
+      <section className="py-16 lg:py-24 bg-gray-100">
+        <div className="container mx-auto px-4 lg:px-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-12">
+            Our Impact So Far
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {stats.map((stat) => (
+              <div
+                key={stat.label}
+                className="bg-white border border-gray-200 rounded-xl p-8 text-center"
+              >
+                <div className="text-3xl md:text-4xl font-bold text-orange-500 mb-2">
+                  {stat.value}
+                </div>
+                <div className="text-gray-500 text-sm">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Cards */}
+      <section className="py-16 lg:py-24 bg-gray-50">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            <div className="bg-orange-500 rounded-xl p-8 text-center">
+              <h3 className="text-2xl font-bold text-white mb-3">
+                Start Your Journey
+              </h3>
+              <p className="text-white/90 mb-6 text-sm">
+                Turn your story into a beacon of hope. Launch an AI-verified campaign today.
+              </p>
+              <button className="bg-white text-gray-800 px-6 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+                Start a Campaign
+              </button>
+            </div>
+            <div className="bg-green-500 rounded-xl p-8 text-center">
+              <h3 className="text-2xl font-bold text-white mb-3">
+                Make a Difference
+              </h3>
+              <p className="text-white/90 mb-6 text-sm">
+                Support those in need with full transparency. Your donation matters.
+              </p>
+              <button className="bg-white text-gray-800 px-6 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+                Find a Cause
+              </button>
+            </div>
           </div>
         </div>
       </section>

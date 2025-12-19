@@ -7,6 +7,8 @@ import {
   LOGIN_ROUTE,
   REGISTER_ROUTE,
   DASHBOARD_ROUTE,
+  DONATION_ROUTE,
+  OTPVERIFY_ROUTE,
 } from "./constant/routes";
 
 import HomePage from "./pages/HomePage";
@@ -16,6 +18,8 @@ import MainLayout from "./layouts/MainLayout";
 import UnAuthLayout from "./layouts/UnAuthLayout";
 import AuthPages from "./components/Login";
 import SignupPage from "./components/Signup";
+import DonationPage from "./pages/DonationPage";
+import OTPVerificationPage from "./pages/OTPVerificationPage";
 
 // Temporary local auth check
 const isAuthenticated = () => {
@@ -32,6 +36,7 @@ const router = createBrowserRouter([
     children: [
       // { path: `${HOME_ROUTE}/:id`, element: <DonationPage /> },
       { path: HOME_ROUTE, element: <HomePage /> },
+      { path: `${DONATION_ROUTE}/:id`, element: <DonationPage /> },
     ]
   },
   {
@@ -44,6 +49,10 @@ const router = createBrowserRouter([
       {
         path: REGISTER_ROUTE,
         element: !isAuthenticated() ? <SignupPage /> : <Navigate to={DASHBOARD_ROUTE} />
+      },
+      {
+        path: OTPVERIFY_ROUTE,
+        element: <OTPVerificationPage />
       }
     ]
   },

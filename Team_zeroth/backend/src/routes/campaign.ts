@@ -1,4 +1,3 @@
-
 import express from 'express';
 import { campaignController } from '../controllers/campaignController.js';
 import { upload } from '../services/multer.js';
@@ -21,6 +20,5 @@ router.post('/createcampaign', requireAuth, upload.array('media', 5), campaignCo
 router.get('/getcampaign', campaignController.getAllCampaigns);
 router.get('/getcampaignbyid', campaignController.getCampaignById);
 router.put('/getcampaign', requireAuth, campaignController.updateCampaign);
-router.delete('/getcampaign/:id', requireAuth, campaignController.deleteCampaign);
 
 export default router;

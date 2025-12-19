@@ -26,12 +26,22 @@ enum CampaignStatus {
   REJECTED
 }
 
+
+enum UserType {
+    ADMIN
+    USER
+    DONOR
+}
+
 model User {
   id           String   @id @default(cuid())
   name         String
   email        String   @unique
   password     String
   isVerified   Boolean  @default(false)
+  type         UserType @default(USER)
+  kycVerified  Boolean  @default(false)
+
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

@@ -1,28 +1,8 @@
 
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../prisma.js';
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
 import { CampaignCategory, CampaignStatus } from '../../generated/prisma/index.js';
-
-
-const uploadDir = 'uploads';
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
-
-export const upload = multer({ storage: storage });
+import { upload } from '../services/multer.js';
 
 
 export const campaignController = {
@@ -35,30 +15,33 @@ export const campaignController = {
     // Create a new campaign
     createCampaign: async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { title, category, location, description, links, milestones, creatorId } = req.body;
+            const creatorId = (req as any).user?.id;
+            if (!creatorId) {
+                return res.status(401).json({ error: 'Not authenticated' });
+            }
 
-            // Basic validation
-            if (!title || !category || !description || !creatorId) {
-                return res.status(400).json({ error: 'Missing required fields: title, category, description, creatorId' });
+            const { title, category, location, description, links } = req.body;
+
+            if (!title || !category || !description) {
+                return res.status(400).json({ error: 'Missing required fields: title, category, description' });
             }
 
             // Handle file uploads
             const files = req.files as Express.Multer.File[];
             const mediaData = files?.map(file => ({
-                userId: creatorId,
-                url: `/uploads/${file.filename}`, // URL accessible from frontend
-                type: file.mimetype.startsWith('image/') ? 'IMAGE' : 'VIDEO' // Simple type deduction
+                url: `/uploads/${file.filename}`, 
+                type: file.mimetype.startsWith('image/') ? 'IMAGE' : 'VIDEO'
             })) || [];
 
-            // Parse links and milestones if they are sent as JSON strings (common with FormData)
             let parsedLinks = [];
-            let parsedMilestones = [];
 
             try {
                 if (links) parsedLinks = typeof links === 'string' ? JSON.parse(links) : links;
-                if (milestones) parsedMilestones = typeof milestones === 'string' ? JSON.parse(milestones) : milestones;
             } catch (e) {
-                return res.status(400).json({ error: 'Invalid JSON format for links or milestones' });
+                return res.status(400).json({ 
+                    error: 'Invalid JSON format for links. Expected format: [{"label":"string","url":"string"}]',
+                    received: links
+                });
             }
 
 
@@ -70,27 +53,18 @@ export const campaignController = {
                     description,
                     creatorId,
                     status: CampaignStatus.DRAFT,
-                    media: {
-                        create: mediaData
-                    },
-                    links: {
-                        create: parsedLinks.map((link: any) => ({
-                            userId: creatorId,
-                            label: link.label,
-                            url: link.url
-                        }))
-                    },
-                    milestones: {
-                        create: parsedMilestones.map((ms: any) => ({
-                            userId: creatorId,
-                            title: ms.title,
-                            description: ms.description,
-                            targetDate: new Date(ms.targetDate)
-                        }))
-                    }
+                    media: mediaData as any, // Store as JSON
+                    ...(parsedLinks.length > 0 && {
+                        links: {
+                            create: parsedLinks.map((link: any) => ({
+                                userId: creatorId,
+                                label: link.label,
+                                url: link.url
+                            }))
+                        }
+                    }),
                 },
                 include: {
-                    media: true,
                     links: true,
                     milestones: true
                 }
@@ -107,7 +81,6 @@ export const campaignController = {
         try {
             const campaigns = await prisma.campaign.findMany({
                 include: {
-                    media: true,
                     creator: {
                         select: { name: true, email: true }
                     }
@@ -123,13 +96,12 @@ export const campaignController = {
     // Get single campaign by ID
     getCampaignById: async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { id } = req.params;
+            const { id } = req.body;
             if (!id) return res.status(400).json({ error: 'Campaign ID is required' });
 
             const campaign = await prisma.campaign.findUnique({
                 where: { id },
                 include: {
-                    media: true,
                     links: true,
                     milestones: true,
                     creator: {
@@ -148,8 +120,23 @@ export const campaignController = {
     // Update campaign
     updateCampaign: async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { id } = req.params;
+            const { id } = req.body;
             if (!id) return res.status(400).json({ error: 'Campaign ID is required' });
+
+            // Get authenticated user
+            const userId = (req as any).user?.id;
+            if (!userId) {
+                return res.status(401).json({ error: 'Not authenticated' });
+            }
+
+            // Verify the campaign belongs to the user
+            const existingCampaign = await prisma.campaign.findUnique({ where: { id } });
+            if (!existingCampaign) {
+                return res.status(404).json({ error: 'Campaign not found' });
+            }
+            if (existingCampaign.creatorId !== userId) {
+                return res.status(403).json({ error: 'Not authorized to update this campaign' });
+            }
 
             const { title, category, location, description, status } = req.body;
 
@@ -174,21 +161,4 @@ export const campaignController = {
         }
     },
 
-    // Delete campaign
-    deleteCampaign: async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const { id } = req.params;
-            if (!id) return res.status(400).json({ error: 'Campaign ID is required' });
-
-            await prisma.campaign.delete({
-                where: { id }
-            });
-            return res.json({ message: 'Campaign deleted successfully' });
-        } catch (err) {
-            if ((err as any).code === 'P2025') {
-                return res.status(404).json({ error: 'Campaign not found' });
-            }
-            next(err);
-        }
-    }
 };

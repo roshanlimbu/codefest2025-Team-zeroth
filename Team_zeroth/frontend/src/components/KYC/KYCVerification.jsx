@@ -5,16 +5,21 @@ const KYCVerification = ({ onVerificationComplete }) => {
     const [currentStep, setCurrentStep] = useState("intro");
     const [kycData, setKycData] = useState({
         photo: null,
-        citizenshipCard: null,
-        citizenshipNumber: "",
+        citizenshipFront: null,
+        citizenshipBack: null,
+        passport: null,
+        signature: null,
         phoneNumber: "",
     });
     const [photoPreview, setPhotoPreview] = useState(null);
-    const [citizenshipPreview, setCitizenshipPreview] = useState(null);
+    const [citizenshipFrontPreview, setCitizenshipFrontPreview] = useState(null);
+    const [citizenshipBackPreview, setCitizenshipBackPreview] = useState(null);
+    const [passportPreview, setPassportPreview] = useState(null);
+    const [signaturePreview, setSignaturePreview] = useState(null);
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const steps = ["photo", "citizenship", "number", "phone", "review"];
+    const steps = ["photo", "citizenship", "passport", "signature", "phone", "review"];
     const stepIndex = steps.indexOf(currentStep);
     const progress = currentStep === "intro" ? 0 : ((stepIndex + 1) / steps.length) * 100;
 
@@ -44,32 +49,87 @@ const KYCVerification = ({ onVerificationComplete }) => {
         }
     };
 
-    const handleCitizenshipUpload = (e) => {
+    const handleCitizenshipFrontUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
             if (!file.type.startsWith('image/')) {
-                setErrors({ ...errors, citizenship: "Please upload a valid image file" });
+                setErrors({ ...errors, citizenshipFront: "Please upload a valid image file" });
                 return;
             }
             if (file.size > 10 * 1024 * 1024) {
-                setErrors({ ...errors, citizenship: "File size must be less than 10MB" });
+                setErrors({ ...errors, citizenshipFront: "File size must be less than 10MB" });
                 return;
             }
-            setKycData({ ...kycData, citizenshipCard: file });
+            setKycData({ ...kycData, citizenshipFront: file });
             const reader = new FileReader();
             reader.onloadend = () => {
-                setCitizenshipPreview(reader.result);
-                setErrors({ ...errors, citizenship: "" });
+                setCitizenshipFrontPreview(reader.result);
+                setErrors({ ...errors, citizenshipFront: "" });
             };
             reader.readAsDataURL(file);
         }
     };
 
-    const handleCitizenshipNumberChange = (e) => {
-        const value = e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
-        setKycData({ ...kycData, citizenshipNumber: value });
-        if (value.trim()) {
-            setErrors({ ...errors, citizenshipNumber: "" });
+    const handleCitizenshipBackUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (!file.type.startsWith('image/')) {
+                setErrors({ ...errors, citizenshipBack: "Please upload a valid image file" });
+                return;
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                setErrors({ ...errors, citizenshipBack: "File size must be less than 10MB" });
+                return;
+            }
+            setKycData({ ...kycData, citizenshipBack: file });
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setCitizenshipBackPreview(reader.result);
+                setErrors({ ...errors, citizenshipBack: "" });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handlePassportUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (!file.type.startsWith('image/')) {
+                setErrors({ ...errors, passport: "Please upload a valid image file" });
+                return;
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                setErrors({ ...errors, passport: "File size must be less than 10MB" });
+                return;
+            }
+            setKycData({ ...kycData, passport: file });
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPassportPreview(reader.result);
+                setErrors({ ...errors, passport: "" });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSignatureUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (!file.type.startsWith('image/')) {
+                setErrors({ ...errors, signature: "Please upload a valid image file" });
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                setErrors({ ...errors, signature: "File size must be less than 5MB" });
+                return;
+            }
+            setKycData({ ...kycData, signature: file });
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setSignaturePreview(reader.result);
+                setErrors({ ...errors, signature: "" });
+            };
+            reader.readAsDataURL(file);
         }
     };
 
@@ -90,20 +150,25 @@ const KYCVerification = ({ onVerificationComplete }) => {
     };
 
     const handleCitizenshipNext = () => {
-        if (!kycData.citizenshipCard) {
-            setErrors({ ...errors, citizenship: "Please upload your citizenship card" });
+        if (!kycData.citizenshipFront) {
+            setErrors({ ...errors, citizenshipFront: "Please upload front side of citizenship card" });
             return;
         }
-        setCurrentStep("number");
+        if (!kycData.citizenshipBack) {
+            setErrors({ ...errors, citizenshipBack: "Please upload back side of citizenship card" });
+            return;
+        }
+        setCurrentStep("passport");
     };
 
-    const handleNumberNext = () => {
-        if (!kycData.citizenshipNumber.trim()) {
-            setErrors({ ...errors, citizenshipNumber: "Please enter your citizenship number" });
-            return;
-        }
-        if (kycData.citizenshipNumber.length < 5) {
-            setErrors({ ...errors, citizenshipNumber: "Please enter a valid citizenship number" });
+    const handlePassportNext = () => {
+        // Passport is optional, can skip
+        setCurrentStep("signature");
+    };
+
+    const handleSignatureNext = () => {
+        if (!kycData.signature) {
+            setErrors({ ...errors, signature: "Please upload your signature" });
             return;
         }
         setCurrentStep("phone");
@@ -126,8 +191,12 @@ const KYCVerification = ({ onVerificationComplete }) => {
 
         const formData = new FormData();
         formData.append("photo", kycData.photo);
-        formData.append("citizenshipCard", kycData.citizenshipCard);
-        formData.append("citizenshipNumber", kycData.citizenshipNumber);
+        formData.append("citizenship", kycData.citizenshipFront);
+        formData.append("citizenship", kycData.citizenshipBack);
+        if (kycData.passport) {
+            formData.append("passport", kycData.passport);
+        }
+        formData.append("signature", kycData.signature);
         formData.append("phoneNumber", kycData.phoneNumber);
 
         // Simulate API call
@@ -187,7 +256,7 @@ const KYCVerification = ({ onVerificationComplete }) => {
                             />
                         </div>
 
-                        <div className="flex justify-between items-start max-w-2xl mx-auto mb-8">
+                        <div className="flex justify-between items-start max-w-3xl mx-auto mb-8">
                             <StepIndicator
                                 step="photo"
                                 label="Photo"
@@ -213,10 +282,10 @@ const KYCVerification = ({ onVerificationComplete }) => {
                             </div>
 
                             <StepIndicator
-                                step="number"
-                                label="ID Number"
-                                icon={Hash}
-                                isActive={currentStep === "number"}
+                                step="passport"
+                                label="Passport"
+                                icon={FileText}
+                                isActive={currentStep === "passport"}
                                 isCompleted={steps.indexOf(currentStep) > 2}
                             />
                             <div className="flex-1 h-0.5 bg-gray-200 mt-6 mx-2">
@@ -225,14 +294,26 @@ const KYCVerification = ({ onVerificationComplete }) => {
                             </div>
 
                             <StepIndicator
-                                step="phone"
-                                label="Phone"
-                                icon={Phone}
-                                isActive={currentStep === "phone"}
+                                step="signature"
+                                label="Signature"
+                                icon={FileText}
+                                isActive={currentStep === "signature"}
                                 isCompleted={steps.indexOf(currentStep) > 3}
                             />
                             <div className="flex-1 h-0.5 bg-gray-200 mt-6 mx-2">
                                 <div className={`h-full bg-green-500 transition-all duration-300 ${steps.indexOf(currentStep) > 3 ? 'w-full' : 'w-0'
+                                    }`} />
+                            </div>
+
+                            <StepIndicator
+                                step="phone"
+                                label="Phone"
+                                icon={Phone}
+                                isActive={currentStep === "phone"}
+                                isCompleted={steps.indexOf(currentStep) > 4}
+                            />
+                            <div className="flex-1 h-0.5 bg-gray-200 mt-6 mx-2">
+                                <div className={`h-full bg-green-500 transition-all duration-300 ${steps.indexOf(currentStep) > 4 ? 'w-full' : 'w-0'
                                     }`} />
                             </div>
 
@@ -366,34 +447,38 @@ const KYCVerification = ({ onVerificationComplete }) => {
                         <div className="max-w-xl mx-auto">
                             <h2 className="text-2xl font-bold text-gray-900 mb-2">Upload Citizenship Card</h2>
                             <p className="text-gray-600 mb-6">
-                                Please upload a clear image of your citizenship card. Either front or back side is acceptable.
+                                Please upload clear images of both sides of your citizenship card.
                             </p>
 
+                            {/* Front Side */}
                             <div className="mb-6">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Front Side
+                                </label>
                                 <label className="block">
                                     <input
                                         type="file"
                                         accept="image/*"
-                                        onChange={handleCitizenshipUpload}
+                                        onChange={handleCitizenshipFrontUpload}
                                         className="hidden"
-                                        id="citizenship-input"
+                                        id="citizenship-front-input"
                                     />
                                     <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-green-500 transition-colors bg-gray-50 hover:bg-green-50">
                                         <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                                        <p className="text-gray-700 font-medium mb-1">Click to upload citizenship card</p>
+                                        <p className="text-gray-700 font-medium mb-1">Click to upload front side</p>
                                         <p className="text-sm text-gray-500">Maximum file size: 10MB</p>
                                     </div>
                                 </label>
                             </div>
 
-                            {citizenshipPreview && (
+                            {citizenshipFrontPreview && (
                                 <div className="mb-6 bg-gray-50 rounded-xl p-4">
-                                    <p className="text-sm font-medium text-gray-700 mb-3">Preview:</p>
+                                    <p className="text-sm font-medium text-gray-700 mb-3">Front Side Preview:</p>
                                     <div className="relative inline-block">
                                         <img
-                                            src={citizenshipPreview}
-                                            alt="Citizenship Preview"
-                                            className="max-w-full h-64 object-cover rounded-lg shadow-md"
+                                            src={citizenshipFrontPreview}
+                                            alt="Citizenship Front"
+                                            className="max-w-full h-48 object-cover rounded-lg shadow-md"
                                         />
                                         <div className="absolute top-2 right-2 bg-green-500 text-white p-2 rounded-full">
                                             <Check className="w-4 h-4" />
@@ -402,10 +487,54 @@ const KYCVerification = ({ onVerificationComplete }) => {
                                 </div>
                             )}
 
-                            {errors.citizenship && (
+                            {errors.citizenshipFront && (
                                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center text-red-700">
                                     <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
-                                    <span className="text-sm">{errors.citizenship}</span>
+                                    <span className="text-sm">{errors.citizenshipFront}</span>
+                                </div>
+                            )}
+
+                            {/* Back Side */}
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Back Side
+                                </label>
+                                <label className="block">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleCitizenshipBackUpload}
+                                        className="hidden"
+                                        id="citizenship-back-input"
+                                    />
+                                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-green-500 transition-colors bg-gray-50 hover:bg-green-50">
+                                        <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                                        <p className="text-gray-700 font-medium mb-1">Click to upload back side</p>
+                                        <p className="text-sm text-gray-500">Maximum file size: 10MB</p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            {citizenshipBackPreview && (
+                                <div className="mb-6 bg-gray-50 rounded-xl p-4">
+                                    <p className="text-sm font-medium text-gray-700 mb-3">Back Side Preview:</p>
+                                    <div className="relative inline-block">
+                                        <img
+                                            src={citizenshipBackPreview}
+                                            alt="Citizenship Back"
+                                            className="max-w-full h-48 object-cover rounded-lg shadow-md"
+                                        />
+                                        <div className="absolute top-2 right-2 bg-green-500 text-white p-2 rounded-full">
+                                            <Check className="w-4 h-4" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {errors.citizenshipBack && (
+                                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center text-red-700">
+                                    <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+                                    <span className="text-sm">{errors.citizenshipBack}</span>
                                 </div>
                             )}
 
@@ -426,37 +555,51 @@ const KYCVerification = ({ onVerificationComplete }) => {
                         </div>
                     )}
 
-                    {/* Citizenship Number Step */}
-                    {currentStep === "number" && (
+                    {/* Passport Step (Optional) */}
+                    {currentStep === "passport" && (
                         <div className="max-w-xl mx-auto">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Enter Citizenship Number</h2>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Upload Passport (Optional)</h2>
                             <p className="text-gray-600 mb-6">
-                                Enter your citizenship number exactly as it appears on your citizenship card.
+                                If you have a passport, please upload it. This step is optional and can be skipped.
                             </p>
 
                             <div className="mb-6">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Citizenship Number
-                                </label>
-                                <div className="relative">
-                                    <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                <label className="block">
                                     <input
-                                        type="text"
-                                        value={kycData.citizenshipNumber}
-                                        onChange={handleCitizenshipNumberChange}
-                                        placeholder="e.g., 123-456-789"
-                                        className="w-full pl-11 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handlePassportUpload}
+                                        className="hidden"
+                                        id="passport-input"
                                     />
-                                </div>
-                                <p className="mt-2 text-sm text-gray-500">
-                                    The format may vary. Enter your number as it appears on your card.
-                                </p>
+                                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-green-500 transition-colors bg-gray-50 hover:bg-green-50">
+                                        <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                                        <p className="text-gray-700 font-medium mb-1">Click to upload passport</p>
+                                        <p className="text-sm text-gray-500">Maximum file size: 10MB</p>
+                                    </div>
+                                </label>
                             </div>
 
-                            {errors.citizenshipNumber && (
+                            {passportPreview && (
+                                <div className="mb-6 bg-gray-50 rounded-xl p-4">
+                                    <p className="text-sm font-medium text-gray-700 mb-3">Preview:</p>
+                                    <div className="relative inline-block">
+                                        <img
+                                            src={passportPreview}
+                                            alt="Passport Preview"
+                                            className="max-w-full h-48 object-cover rounded-lg shadow-md"
+                                        />
+                                        <div className="absolute top-2 right-2 bg-green-500 text-white p-2 rounded-full">
+                                            <Check className="w-4 h-4" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {errors.passport && (
                                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center text-red-700">
                                     <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
-                                    <span className="text-sm">{errors.citizenshipNumber}</span>
+                                    <span className="text-sm">{errors.passport}</span>
                                 </div>
                             )}
 
@@ -468,7 +611,72 @@ const KYCVerification = ({ onVerificationComplete }) => {
                                     Back
                                 </button>
                                 <button
-                                    onClick={handleNumberNext}
+                                    onClick={handlePassportNext}
+                                    className="flex-1 px-6 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors shadow-lg"
+                                >
+                                    {passportPreview ? "Next" : "Skip"}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Signature Step */}
+                    {currentStep === "signature" && (
+                        <div className="max-w-xl mx-auto">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Upload Your Signature</h2>
+                            <p className="text-gray-600 mb-6">
+                                Please upload an image of your signature on a white paper.
+                            </p>
+
+                            <div className="mb-6">
+                                <label className="block">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleSignatureUpload}
+                                        className="hidden"
+                                        id="signature-input"
+                                    />
+                                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-green-500 transition-colors bg-gray-50 hover:bg-green-50">
+                                        <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                                        <p className="text-gray-700 font-medium mb-1">Click to upload signature</p>
+                                        <p className="text-sm text-gray-500">Maximum file size: 5MB</p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            {signaturePreview && (
+                                <div className="mb-6 bg-gray-50 rounded-xl p-4">
+                                    <p className="text-sm font-medium text-gray-700 mb-3">Preview:</p>
+                                    <div className="relative inline-block">
+                                        <img
+                                            src={signaturePreview}
+                                            alt="Signature Preview"
+                                            className="max-w-full h-48 object-cover rounded-lg shadow-md"
+                                        />
+                                        <div className="absolute top-2 right-2 bg-green-500 text-white p-2 rounded-full">
+                                            <Check className="w-4 h-4" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {errors.signature && (
+                                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center text-red-700">
+                                    <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+                                    <span className="text-sm">{errors.signature}</span>
+                                </div>
+                            )}
+
+                            <div className="flex gap-4">
+                                <button
+                                    onClick={handleBack}
+                                    className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
+                                >
+                                    Back
+                                </button>
+                                <button
+                                    onClick={handleSignatureNext}
                                     className="flex-1 px-6 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors shadow-lg"
                                 >
                                     Next
@@ -576,36 +784,81 @@ const KYCVerification = ({ onVerificationComplete }) => {
                                         </div>
                                         <Check className="w-5 h-5 text-green-600" />
                                     </div>
-                                    {citizenshipPreview && (
-                                        <img
-                                            src={citizenshipPreview}
-                                            alt="Citizenship card"
-                                            className="w-full h-48 object-cover rounded-lg shadow-sm mb-3"
-                                        />
-                                    )}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {citizenshipFrontPreview && (
+                                            <div>
+                                                <p className="text-xs text-gray-600 mb-2">Front Side</p>
+                                                <img
+                                                    src={citizenshipFrontPreview}
+                                                    alt="Citizenship Front"
+                                                    className="w-full h-32 object-cover rounded-lg shadow-sm"
+                                                />
+                                            </div>
+                                        )}
+                                        {citizenshipBackPreview && (
+                                            <div>
+                                                <p className="text-xs text-gray-600 mb-2">Back Side</p>
+                                                <img
+                                                    src={citizenshipBackPreview}
+                                                    alt="Citizenship Back"
+                                                    className="w-full h-32 object-cover rounded-lg shadow-sm"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
                                     <button
                                         onClick={() => setCurrentStep("citizenship")}
-                                        className="text-green-600 hover:text-green-700 font-semibold text-sm flex items-center"
+                                        className="text-green-600 hover:text-green-700 font-semibold text-sm flex items-center mt-3"
                                     >
                                         Change Card →
                                     </button>
                                 </div>
 
-                                {/* Citizenship Number Review */}
+                                {/* Passport Review (if uploaded) */}
+                                {passportPreview && (
+                                    <div className="bg-gray-50 rounded-xl p-6">
+                                        <div className="flex items-start justify-between mb-4">
+                                            <div className="flex items-center">
+                                                <FileText className="w-5 h-5 text-green-600 mr-2" />
+                                                <h3 className="font-semibold text-gray-900">Passport</h3>
+                                            </div>
+                                            <Check className="w-5 h-5 text-green-600" />
+                                        </div>
+                                        <img
+                                            src={passportPreview}
+                                            alt="Passport"
+                                            className="w-full h-48 object-cover rounded-lg shadow-sm mb-3"
+                                        />
+                                        <button
+                                            onClick={() => setCurrentStep("passport")}
+                                            className="text-green-600 hover:text-green-700 font-semibold text-sm flex items-center"
+                                        >
+                                            Change Passport →
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Signature Review */}
                                 <div className="bg-gray-50 rounded-xl p-6">
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="flex items-center">
-                                            <Hash className="w-5 h-5 text-green-600 mr-2" />
-                                            <h3 className="font-semibold text-gray-900">Citizenship Number</h3>
+                                            <FileText className="w-5 h-5 text-green-600 mr-2" />
+                                            <h3 className="font-semibold text-gray-900">Signature</h3>
                                         </div>
                                         <Check className="w-5 h-5 text-green-600" />
                                     </div>
-                                    <p className="text-gray-900 font-mono text-lg mb-3">{kycData.citizenshipNumber}</p>
+                                    {signaturePreview && (
+                                        <img
+                                            src={signaturePreview}
+                                            alt="Signature"
+                                            className="w-full h-32 object-cover rounded-lg shadow-sm mb-3"
+                                        />
+                                    )}
                                     <button
-                                        onClick={() => setCurrentStep("number")}
+                                        onClick={() => setCurrentStep("signature")}
                                         className="text-green-600 hover:text-green-700 font-semibold text-sm flex items-center"
                                     >
-                                        Change Number →
+                                        Change Signature →
                                     </button>
                                 </div>
 

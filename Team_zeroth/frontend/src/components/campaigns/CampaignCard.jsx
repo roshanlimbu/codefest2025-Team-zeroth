@@ -23,8 +23,10 @@ const categoryIcons = {
 
 const CampaignCard = ({ campaign }) => {
   const navigate = useNavigate()
-  const progressPercentage = (campaign.fundRaised / campaign.fundTarget) * 100
-  const category = campaign.category || "other"
+  const fundRaised = Number(campaign.fundRaised || 0)
+  const fundTarget = Number(campaign.fundTarget || 0) || 1
+  const progressPercentage = (fundRaised / fundTarget) * 100
+  const category = (campaign.category || "other").toString().toLowerCase()
 
   return (
     <Link to={`${DONATION_ROUTE}/${campaign.id}`}>
@@ -59,12 +61,12 @@ const CampaignCard = ({ campaign }) => {
 
           <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
             <MapPin className="w-4 h-4" />
-            {campaign.district}, {campaign.province}
+            {campaign.location || 'Location not specified'}
           </div>
 
           <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
             <Users className="w-4 h-4" />
-            {campaign.affectedPeople} people affected
+            {campaign.affectedPeople || 0} people affected
           </div>
 
           {/* Progress */}

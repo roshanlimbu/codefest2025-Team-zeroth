@@ -1,24 +1,59 @@
 import { Search, Filter, MapPin } from "lucide-react"
-import { useState } from "react"
-import { campaignsData } from "../data/campaignData"
+import { useEffect, useState } from "react"
+import axiosClient from "../api/axiosClient"
 import CampaignCard from "../components/campaigns/CampaignCard"
 
 const CampaignsPage = () => {
   const [searchQuery, setSearchQuery] = useState("")
   const [filterType, setFilterType] = useState("all")
+  const [campaigns, setCampaigns] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const resp = await axiosClient.get('/api/campaigns/getcampaign')
+        // Only keep campaigns with status === 'LIVE'
+        const live = (resp.data || []).filter(c => String(c.status).toUpperCase() === 'LIVE')
+        setCampaigns(live)
+      } catch (err) {
+        console.error('Failed to fetch campaigns', err)
+        setError(err.response?.data?.error || err.message || 'Failed to fetch campaigns')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    load()
+  }, [])
 
   // Filter campaigns
-  const filteredCampaigns = campaignsData.filter((campaign) => {
+  const filteredCampaigns = campaigns.filter((campaign) => {
     const matchesSearch =
-      campaign.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      campaign.district.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesFilter = filterType === "all" || campaign.category === filterType
+      (campaign.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (campaign.location || '').toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesFilter = filterType === "all" || (campaign.category || '').toLowerCase() === filterType
 
     return matchesSearch && matchesFilter
   })
 
-  // Get unique categories
-  const categories = ["all", ...new Set(campaignsData.map((c) => c.category || "other"))]
+  // Get unique categories (map backend enums to friendly lowercase values)
+  const CATEGORY_MAP = {
+    MEDICAL: 'health',
+    DISASTER: 'disaster',
+    EDUCATION: 'education',
+    HOUSING: 'housing',
+    LIVELIHOOD: 'community',
+    OTHER: 'other'
+  }
+
+  const categories = [
+    'all',
+    ...Array.from(new Set(campaigns.map(c => (CATEGORY_MAP[c.category] || (c.category || 'other')).toLowerCase())))
+  ]
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -74,18 +109,18 @@ const CampaignsPage = () => {
           {/* Stats Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-3xl font-bold text-orange-500 mb-2">{campaignsData.length}</div>
+              <div className="text-3xl font-bold text-orange-500 mb-2">{campaigns.length}</div>
               <div className="text-gray-600">Active Campaigns</div>
             </div>
             <div className="bg-white rounded-lg shadow p-6">
               <div className="text-3xl font-bold text-orange-500 mb-2">
-                {campaignsData.reduce((sum, c) => sum + (c.affectedPeople || 0), 0)}
+                {campaigns.reduce((sum, c) => sum + ((c.affectedPeople) || 0), 0)}
               </div>
               <div className="text-gray-600">People Affected</div>
             </div>
             <div className="bg-white rounded-lg shadow p-6">
               <div className="text-3xl font-bold text-orange-500 mb-2">
-                Rs {campaignsData.reduce((sum, c) => sum + (c.fundRaised || 0), 0).toLocaleString()}
+                Rs {campaigns.reduce((sum, c) => sum + ((c.fundRaised) || 0), 0).toLocaleString()}
               </div>
               <div className="text-gray-600">Total Raised</div>
             </div>

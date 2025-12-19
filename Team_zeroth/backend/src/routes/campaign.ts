@@ -20,5 +20,7 @@ router.post('/createcampaign', requireAuth, upload.array('media', 5), campaignCo
 router.get('/getcampaign', campaignController.getAllCampaigns);
 router.get('/getcampaignbyid', campaignController.getCampaignById);
 router.put('/getcampaign', requireAuth, campaignController.updateCampaign);
+// Admin-only campaign moderation
+router.put('/admin/update-status', requireAuth, campaignController.adminUpdateStatus);
 
 export default router;

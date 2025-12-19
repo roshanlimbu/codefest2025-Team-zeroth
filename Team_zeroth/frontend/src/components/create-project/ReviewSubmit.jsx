@@ -1,4 +1,4 @@
-const ReviewSubmit = ({ totalCost, errors }) => {
+const ReviewSubmit = ({ totalCost, errors, onSubmitClick }) => {
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
       <div className="p-6 space-y-6">
@@ -23,6 +23,7 @@ const ReviewSubmit = ({ totalCost, errors }) => {
 
         <button
           type="submit"
+          onClick={(e) => { if (onSubmitClick) { e.preventDefault(); onSubmitClick(); } }}
           className="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

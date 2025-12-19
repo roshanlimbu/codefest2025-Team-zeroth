@@ -14,8 +14,7 @@ const useKYCSubmit = () => {
 
         try {
             // Submit KYC verification
-            // Replace '/api/kyc/verify' with your actual backend endpoint
-            const response = await axiosClient.post("/api/kyc/verify", formData, {
+            const response = await axiosClient.post("/submitKYC", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },

@@ -19,7 +19,10 @@ export const getProfile = async (req: Request, res: Response, next: NextFunction
                 name: true,
                 email: true,
                 type: true,
-                kycVerified: true
+                phoneNumber: true,
+                kycVerified: true,
+                kycSubmittedAt: true,
+                kycDocuments: true,
             }
         });
         if (!user) return res.status(404).json({ error: 'User not found' });

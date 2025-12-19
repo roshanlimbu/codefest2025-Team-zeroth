@@ -1,19 +1,25 @@
 import { Request, Response, NextFunction } from 'express';
-import { withAccelerate } from '@prisma/extension-accelerate'
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient().$extends(withAccelerate())
+import prisma from '../prisma.js';
 
 
 export const userFuncObj = {
     getAllusers: async (req: Request, res: Response, next: NextFunction) => {
         try {
             const users = await prisma.user.findMany({
-                cacheStrategy: { 
-                    ttl: 30, // Consider data fresh for 30 seconds
-                    swr: 60  // Serve stale data for up to 60 seconds while fetching fresh data
-                }
-            })
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    type: true,
+                    kycVerified: true,
+                    kycSubmittedAt: true,
+                    kycDocuments: true,
+                    createdAt: true,
+                    updatedAt: true
+                },
+                orderBy: { createdAt: 'desc' }
+            });
+
             return res.json({ users });
         } catch (err) {
             next(err);

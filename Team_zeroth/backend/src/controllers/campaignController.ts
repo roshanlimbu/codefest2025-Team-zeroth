@@ -26,6 +26,27 @@ export const campaignController = {
                 return res.status(400).json({ error: 'Missing required fields: title, category, description' });
             }
 
+            // Normalize category from frontend-friendly values to Prisma enum
+            const rawCat = String(category || '').trim().toLowerCase();
+            const CATEGORY_MAP: Record<string, string> = {
+                medical: 'MEDICAL',
+                health: 'MEDICAL',
+                disaster: 'DISASTER',
+                education: 'EDUCATION',
+                housing: 'HOUSING',
+                livelihood: 'LIVELIHOOD',
+                community: 'LIVELIHOOD',
+                other: 'OTHER',
+            };
+
+            const mappedCategory = CATEGORY_MAP[rawCat] || rawCat.toUpperCase();
+
+            // Validate mappedCategory is a valid CampaignCategory
+            const validCategories = Object.values(CampaignCategory) as string[];
+            if (!validCategories.includes(mappedCategory)) {
+                return res.status(400).json({ error: `Invalid category. Valid categories: ${validCategories.join(', ')}` });
+            }
+
             // Handle file uploads
             const files = req.files as Express.Multer.File[];
             const mediaData = files?.map(file => ({
@@ -48,7 +69,7 @@ export const campaignController = {
             const campaign = await prisma.campaign.create({
                 data: {
                     title,
-                    category: category as CampaignCategory,
+                    category: mappedCategory as CampaignCategory,
                     location: location || '',
                     description,
                     creatorId,
@@ -83,11 +104,48 @@ export const campaignController = {
                 include: {
                     creator: {
                         select: { name: true, email: true }
-                    }
+                    },
+                    links: true,
+                    milestones: true,
                 },
                 orderBy: { createdAt: 'desc' }
             });
-            return res.json(campaigns);
+
+            // Transform campaigns to include computed fields frontend expects
+            const transformed = campaigns.map(c => {
+                // media stored as JSON array of { url, type }
+                const media = (c.media as any) || [];
+                const heroImage = Array.isArray(media) && media.length > 0 ? media[0].url : null;
+
+                // Compute fund target and raised from milestones
+                const fundTarget = (c.milestones || []).reduce((sum: number, m: any) => {
+                    const t = typeof m.target === 'bigint' ? Number(m.target) : Number(m.target || 0);
+                    return sum + (isNaN(t) ? 0 : t);
+                }, 0);
+
+                const fundRaised = (c.milestones || []).reduce((sum: number, m: any) => {
+                    const r = typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : Number(m.raisedAmount || 0);
+                    return sum + (isNaN(r) ? 0 : r);
+                }, 0);
+
+                return {
+                    id: c.id,
+                    title: c.title,
+                    category: c.category,
+                    location: c.location,
+                    heroImage,
+                    description: c.description,
+                    status: c.status,
+                    createdAt: c.createdAt,
+                    links: c.links || [],
+                    milestones: c.milestones || [],
+                    creator: c.creator,
+                    fundTarget,
+                    fundRaised,
+                };
+            });
+
+            return res.json(transformed);
         } catch (err) {
             next(err);
         }
@@ -96,7 +154,8 @@ export const campaignController = {
     // Get single campaign by ID
     getCampaignById: async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { id } = req.body;
+            // Accept id from body, query or params
+            const id = req.body?.id || req.query?.id || req.params?.id;
             if (!id) return res.status(400).json({ error: 'Campaign ID is required' });
 
             const campaign = await prisma.campaign.findUnique({
@@ -111,7 +170,36 @@ export const campaignController = {
             });
 
             if (!campaign) return res.status(404).json({ error: 'Campaign not found' });
-            return res.json(campaign);
+
+            // Transform to match frontend expectations (heroImage, fundTarget, fundRaised)
+            const media = (campaign.media as any) || [];
+            const heroImage = Array.isArray(media) && media.length > 0 ? media[0].url : null;
+
+            const fundTarget = (campaign.milestones || []).reduce((sum: number, m: any) => {
+                const t = typeof m.target === 'bigint' ? Number(m.target) : Number(m.target || 0);
+                return sum + (isNaN(t) ? 0 : t);
+            }, 0);
+
+            const fundRaised = (campaign.milestones || []).reduce((sum: number, m: any) => {
+                const r = typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : Number(m.raisedAmount || 0);
+                return sum + (isNaN(r) ? 0 : r);
+            }, 0);
+
+            return res.json({
+                id: campaign.id,
+                title: campaign.title,
+                category: campaign.category,
+                location: campaign.location,
+                heroImage,
+                description: campaign.description,
+                status: campaign.status,
+                createdAt: campaign.createdAt,
+                links: campaign.links || [],
+                milestones: campaign.milestones || [],
+                creator: campaign.creator,
+                fundTarget,
+                fundRaised,
+            });
         } catch (err) {
             next(err);
         }
@@ -160,5 +248,86 @@ export const campaignController = {
             next(err);
         }
     },
+
+    // Admin: update campaign status (approve/reject/verify etc.)
+    adminUpdateStatus: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { id, status } = req.body;
+            if (!id || !status) return res.status(400).json({ error: 'Campaign id and status are required' });
+
+            // Validate status
+            const validStatuses = Object.values(CampaignStatus) as string[];
+            if (!validStatuses.includes(status)) return res.status(400).json({ error: `Invalid status. Valid: ${validStatuses.join(', ')}` });
+
+            // Check requester is admin by reading session via cookie
+            const sid = (req as any).sessionId || req.cookies?.[process.env.COOKIE_NAME ?? 'sid'];
+            if (!sid) return res.status(401).json({ error: 'Not authenticated' });
+
+            const session = await prisma.session.findUnique({ where: { id: sid }, include: { user: true } });
+            if (!session) return res.status(401).json({ error: 'Invalid session' });
+            if (session.user.type !== 'ADMIN') return res.status(403).json({ error: 'Admin only' });
+
+            const updated = await prisma.campaign.update({ where: { id }, data: { status: status as any } });
+            return res.json({ message: 'Campaign status updated', campaign: updated });
+        } catch (err) {
+            next(err);
+        }
+    }
+,
+    // Admin: get all campaigns (no filtering) for moderation
+    adminGetAllCampaigns: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            // verify admin
+            const sid = req.cookies?.[process.env.COOKIE_NAME ?? 'sid'];
+            if (!sid) return res.status(401).json({ error: 'Not authenticated' });
+            const session = await prisma.session.findUnique({ where: { id: sid }, include: { user: true } });
+            if (!session) return res.status(401).json({ error: 'Invalid session' });
+            if (session.user.type !== 'ADMIN') return res.status(403).json({ error: 'Admin only' });
+
+            const campaigns = await prisma.campaign.findMany({
+                include: {
+                    creator: true,
+                    links: true,
+                    milestones: true,
+                },
+                orderBy: { createdAt: 'desc' }
+            });
+
+            const transformed = campaigns.map(c => {
+                const media = (c.media as any) || [];
+                const heroImage = Array.isArray(media) && media.length > 0 ? media[0].url : null;
+
+                const fundTarget = (c.milestones || []).reduce((sum: number, m: any) => {
+                    const t = typeof m.target === 'bigint' ? Number(m.target) : Number(m.target || 0);
+                    return sum + (isNaN(t) ? 0 : t);
+                }, 0);
+
+                const fundRaised = (c.milestones || []).reduce((sum: number, m: any) => {
+                    const r = typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : Number(m.raisedAmount || 0);
+                    return sum + (isNaN(r) ? 0 : r);
+                }, 0);
+
+                return {
+                    id: c.id,
+                    title: c.title,
+                    category: c.category,
+                    location: c.location,
+                    heroImage,
+                    description: c.description,
+                    status: c.status,
+                    createdAt: c.createdAt,
+                    links: c.links || [],
+                    milestones: c.milestones || [],
+                    creator: c.creator,
+                    fundTarget,
+                    fundRaised,
+                };
+            });
+
+            return res.json(transformed);
+        } catch (err) {
+            next(err);
+        }
+    }
 
 };

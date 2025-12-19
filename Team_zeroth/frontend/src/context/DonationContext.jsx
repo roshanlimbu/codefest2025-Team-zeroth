@@ -3,27 +3,39 @@ import { createContext, useContext, useState } from "react"
 const DonationContext = createContext()
 
 const DonationProvider = ({ children, campaignData }) => {
-    // Build the internal structure to match expected format
+    // Safe defaults and fallbacks for legacy/mock/partial campaign objects
+    const campaign = campaignData || {}
+
+    const beneficiary = campaign.beneficiary || (campaign.creator ? {
+        name: campaign.creator.name || 'Beneficiary',
+        profileImage: null,
+        story: ''
+    } : { name: 'Beneficiary', profileImage: null, story: '' })
+
+    // Try to extract district/province from location if available (simple split), else default
+    const locationStr = campaign.location || ''
+    const [district = '', province = ''] = locationStr ? locationStr.split(',').map(s => s.trim()) : [ '', '' ]
+
     const providerData = {
         campaign: {
-            id: campaignData.id,
-            title: campaignData.title,
-            heroImage: campaignData.heroImage,
-            status: campaignData.status,
+            id: campaign.id,
+            title: campaign.title || 'Untitled Campaign',
+            heroImage: campaign.heroImage || '/placeholder.svg',
+            status: campaign.status || 'DRAFT',
             aiApproved: true,
             secureBlockchain: true,
-            totalTarget: campaignData.fundTarget,
-            totalRaised: campaignData.fundRaised,
+            totalTarget: Number(campaign.fundTarget || 0),
+            totalRaised: Number(campaign.fundRaised || 0),
             currency: "Rs",
             featured: true,
-            district: campaignData.district,
-            province: campaignData.province,
-            affectedPeople: campaignData.affectedPeople,
+            district: district || campaign.district || 'Unknown',
+            province: province || campaign.province || 'Unknown',
+            affectedPeople: campaign.affectedPeople || 0,
         },
-        beneficiary: campaignData.beneficiary,
-        donationOptions: campaignData.donationOptions,
-        disaster: campaignData.disaster,
-        milestones: campaignData.milestones,
+        beneficiary,
+        donationOptions: campaign.donationOptions || [],
+        disaster: campaign.disaster || null,
+        milestones: campaign.milestones || [],
     }
 
     const [selectedAmount, setSelectedAmount] = useState(50)
@@ -44,9 +56,9 @@ const DonationProvider = ({ children, campaignData }) => {
         donationMessage,
         setDonationMessage,
 
-        // Computed values
-        fundingProgress: (providerData.campaign.totalRaised / providerData.campaign.totalTarget) * 100,
-        remainingAmount: providerData.campaign.totalTarget - providerData.campaign.totalRaised,
+        // Computed values (guard division by zero)
+        fundingProgress: providerData.campaign.totalTarget > 0 ? (providerData.campaign.totalRaised / providerData.campaign.totalTarget) * 100 : 0,
+        remainingAmount: Math.max(0, providerData.campaign.totalTarget - providerData.campaign.totalRaised),
 
         // Actions
         handleDonation: () => {

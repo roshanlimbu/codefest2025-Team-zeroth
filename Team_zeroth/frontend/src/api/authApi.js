@@ -1,9 +1,14 @@
 import axiosClient from "./axiosClient";
 
-export const registerUser = async ({ name, email, password }) => {
-    console.log("Registering user:", { name, email, password });` `
+export const registerUser = async ({ name, email, password, role }) => {
+    console.log("Registering user:", { name, email, password, role });
     try {
-        const res = await axiosClient.post("/register", { name, email, password });
+        const res = await axiosClient.post("/register", { 
+            name, 
+            email, 
+            password,
+            type: role
+        });
         return res.data;
     } catch (err) {
         throw err.response?.data || err;

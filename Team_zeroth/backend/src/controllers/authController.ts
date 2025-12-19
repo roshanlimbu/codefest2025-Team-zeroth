@@ -207,7 +207,7 @@ export const auth = {
 
             res.cookie(COOKIE_NAME, sessionId, {
                 httpOnly: true,
-                sameSite: 'none',
+                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
                 secure: process.env.NODE_ENV === 'production' ? true : false,
                 maxAge: SESSION_TTL_MINUTES * 60 * 1000,
             });

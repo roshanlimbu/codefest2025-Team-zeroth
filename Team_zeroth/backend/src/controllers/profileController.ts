@@ -18,7 +18,7 @@ export const getProfile = async (req: Request, res: Response, next: NextFunction
                 id: true,
                 name: true,
                 email: true,
-                role: true,
+                type: true,
                 kycVerified: true
             }
         });

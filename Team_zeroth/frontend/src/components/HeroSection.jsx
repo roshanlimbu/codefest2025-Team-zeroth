@@ -1,6 +1,6 @@
 import { Cpu, Link2, Award, CheckSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { CAMPAIGN_ROUTE } from "../constant/routes";
+import { CAMPAIGN_CREATE_ROUTE, CAMPAIGN_ROUTE, LOGIN_ROUTE } from "../constant/routes";
 
 const features = [
   {
@@ -37,7 +37,7 @@ const HeroSection = () => {
     if (!isAuthenticated) {
       // User not logged in
       alert("You need to log in to start a campaign.");
-      navigate("/login"); // redirect to login page
+      navigate(LOGIN_ROUTE); // redirect to login page
       return;
     }
 
@@ -48,7 +48,7 @@ const HeroSection = () => {
     }
 
     // Passed all checks, navigate to campaign creation page
-    navigate(CAMPAIGN_ROUTE);
+    navigate(CAMPAIGN_CREATE_ROUTE);
   };
 
   // Handle Donate button click

@@ -10,9 +10,27 @@ import campaignRouter from './routes/campaign.js';
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
+
+// Configure CORS to allow credentials (cookies)
 app.use(cors({
-    origin: true,
+    origin: function (origin, callback) {
+        // Allow requests from localhost and the frontend origin
+        const allowedOrigins = [
+            'http://localhost:5173',
+            'http://localhost:3000',
+            'http://localhost:5174',
+            'http://localhost:8000',
+        ];
+
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.log(`CORS blocked origin: ${origin}`);
+            callback(new Error('CORS not allowed'));
+        }
+    },
     credentials: true,
+    allowedHeaders: ['Content-Type', 'x-xsrf-token', 'x-csrf-token'],
 }));
 
 const PORT = Number(process.env.PORT) || 8080;

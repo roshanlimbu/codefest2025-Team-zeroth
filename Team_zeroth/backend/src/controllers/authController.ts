@@ -41,13 +41,13 @@ export const auth = {
             }
 
             const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-            
+
             if (!files || Object.keys(files).length === 0) {
                 return res.status(400).json({ error: 'KYC documents are required' });
             }
 
             const kycDocuments: any = {};
-            
+
             if (files.citizenship && files.citizenship.length > 0) {
                 kycDocuments.citizenship = files.citizenship.map(file => `/uploads/${file.filename}`);
             }
@@ -207,8 +207,8 @@ export const auth = {
 
             res.cookie(COOKIE_NAME, sessionId, {
                 httpOnly: true,
-                sameSite: 'lax',
-                secure: false, // set true in prod (HTTPS)
+                sameSite: 'none',
+                secure: process.env.NODE_ENV === 'production' ? true : false,
                 maxAge: SESSION_TTL_MINUTES * 60 * 1000,
             });
 
@@ -263,4 +263,3 @@ export const auth = {
         }
     },
 };
-

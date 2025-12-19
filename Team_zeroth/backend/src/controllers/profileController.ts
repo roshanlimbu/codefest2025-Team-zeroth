@@ -12,11 +12,20 @@ export const getProfile = async (req: Request, res: Response, next: NextFunction
         const userId = (req as any).user?.id;
         if (!userId) return res.status(401).json({ error: 'Not authenticated' });
 
-        const user = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, name: true, email: true } });
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                kycVerified: true
+            }
+        });
         if (!user) return res.status(404).json({ error: 'User not found' });
 
         return res.json({ ok: true, user });
     } catch (err) {
         next(err);
-    }   
+    }
 }

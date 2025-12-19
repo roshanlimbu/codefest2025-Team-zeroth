@@ -1,17 +1,33 @@
-import React from 'react'
 import { Outlet } from 'react-router-dom'
 
-import Navbar from "../components/Navbar"
 import Footer from "../components/Footer"
+import KYCModal from "../components/KYC/KYCModal"
+import Navbar from "../components/Navbar"
+import useProfileCheck from "../hooks/useProfileCheck"
 
 const MainLayout = () => {
-  return (
-    <>
-      <Navbar />
-      <Outlet />
-      <Footer />
-    </>
-  )
+    const {
+        loading,
+        showKYCModal,
+        handleKYCModalClose,
+        handleKYCModalNavigate,
+    } = useProfileCheck();
+
+    return (
+        <>
+            <Navbar />
+
+
+            <KYCModal
+                isOpen={showKYCModal}
+                onClose={handleKYCModalClose}
+                onNavigateToKYC={handleKYCModalNavigate}
+            />
+
+            <Outlet />
+            <Footer />
+        </>
+    )
 }
 
 export default MainLayout

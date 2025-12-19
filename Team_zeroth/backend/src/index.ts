@@ -25,7 +25,7 @@ app.get('/', async (req: Request, res: Response) => {
 
 app.use('/', authRouter);
 app.use('/api', profileRouter);
-app.use('/campaigns', campaignRouter);
+app.use('/api/campaigns', campaignRouter);
 app.use('/uploads', express.static('uploads'));
 
 if (process.env.NODE_ENV !== 'production') {

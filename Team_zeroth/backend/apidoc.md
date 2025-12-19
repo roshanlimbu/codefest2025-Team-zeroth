@@ -102,6 +102,49 @@ Body:
 
 ---
 
+**POST /logout**
+
+- Description: Log out the authenticated user by destroying their session and clearing the session cookie.
+- Required:
+  - Cookie: `sid` (session id cookie)
+
+- Success response (200 OK):
+
+```json
+{
+  "message": "Logged out"
+}
+```
+
+- Errors (examples):
+  - 400: no active session -> `{ "error": "No active session" }`
+
+---
+
+**POST /verifyKYC**
+
+- Description: Mark a user as KYC verified. Sets the `kycVerified` flag to `true` for the specified user.
+- Request JSON payload:
+
+```json
+{
+  "userId": "<user-id>"
+}
+```
+
+- Success response (200 OK):
+
+```json
+{
+  "message": "KYC verified successfully"
+}
+```
+
+- Errors (examples):
+  - 404: user not found -> `{ "error": "User not found" }`
+
+---
+
 **GET /api/profile**
 
 - Description: Returns the authenticated user's profile. Protected route — requires a valid session cookie and XSRF header.

@@ -27,6 +27,65 @@ type PendingRegistration = {
 const pendingRegistrations = new Map<string, PendingRegistration>();
 
 export const auth = {
+    submitKYC: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const userId = (req as any).user?.id;
+            if (!userId) {
+                return res.status(401).json({ error: 'Not authenticated' });
+            }
+
+            const { phoneNumber } = req.body;
+
+            if (!phoneNumber) {
+                return res.status(400).json({ error: 'Phone number is required' });
+            }
+
+            const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+            
+            if (!files || Object.keys(files).length === 0) {
+                return res.status(400).json({ error: 'KYC documents are required' });
+            }
+
+            const kycDocuments: any = {};
+            
+            if (files.citizenship && files.citizenship.length > 0) {
+                kycDocuments.citizenship = files.citizenship.map(file => `/uploads/${file.filename}`);
+            }
+            if (files.passport && files.passport[0]) {
+                kycDocuments.passport = `/uploads/${files.passport[0].filename}`;
+            }
+            if (files.photo && files.photo[0]) {
+                kycDocuments.photo = `/uploads/${files.photo[0].filename}`;
+            }
+            if (files.signature && files.signature[0]) {
+                kycDocuments.signature = `/uploads/${files.signature[0].filename}`;
+            }
+
+            const updatedUser = await prisma.user.update({
+                where: { id: userId },
+                data: {
+                    phoneNumber,
+                    kycDocuments: kycDocuments as any,
+                    kycSubmittedAt: new Date()
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    phoneNumber: true,
+                    kycSubmittedAt: true,
+                    kycVerified: true
+                }
+            });
+
+            return res.status(200).json({
+                message: 'KYC documents submitted successfully',
+                user: updatedUser
+            });
+        } catch (err) {
+            next(err);
+        }
+    },
     register: async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { name, email, password, type } = req.body;

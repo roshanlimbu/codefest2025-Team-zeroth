@@ -3,16 +3,18 @@ import React from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import {
-  HOME_ROUTE,
-  LOGIN_ROUTE,
-  REGISTER_ROUTE,
-  DASHBOARD_ROUTE,
-  DONATION_ROUTE,
-  OTPVERIFY_ROUTE,
+    HOME_ROUTE,
+    LOGIN_ROUTE,
+    REGISTER_ROUTE,
+    DASHBOARD_ROUTE,
+    KYC_ROUTE,
+    DONATION_ROUTE,
+    OTPVERIFY_ROUTE,
 } from "./constant/routes";
 
 import HomePage from "./pages/HomePage";
 import PageNotFound from "./pages/PageNotFound";
+import KYCPage from "./pages/KYCPage";
 
 import MainLayout from "./layouts/MainLayout";
 import UnAuthLayout from "./layouts/UnAuthLayout";
@@ -23,10 +25,10 @@ import OTPVerificationPage from "./pages/OTPVerificationPage";
 
 // Temporary local auth check
 const isAuthenticated = () => {
-  // Use localStorage token for demo; replace with Redux or context later
-  // const authToken = localStorage.getItem("auth_token");
-  // return !!authToken;
-  return false
+    // Use localStorage token for demo; replace with Redux or context later
+    // const authToken = localStorage.getItem("auth_token");
+    // return !!authToken;
+    return false
 };
 
 const router = createBrowserRouter([
@@ -37,6 +39,7 @@ const router = createBrowserRouter([
       // { path: `${HOME_ROUTE}/:id`, element: <DonationPage /> },
       { path: HOME_ROUTE, element: <HomePage /> },
       { path: `${DONATION_ROUTE}/:id`, element: <DonationPage /> },
+      { path: KYC_ROUTE, element: <KYCPage /> }
     ]
   },
   {
@@ -58,8 +61,8 @@ const router = createBrowserRouter([
   },
   // Protected pages
 
-  // 404 fallback
-  { path: "*", element: <PageNotFound /> }
+    // 404 fallback
+    { path: "*", element: <PageNotFound /> }
 ]);
 
 export default router;

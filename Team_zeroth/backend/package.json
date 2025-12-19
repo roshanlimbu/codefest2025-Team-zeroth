@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsc --watch",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "start": "nodemon dist/index.js",
     "mailer": "node src/services/mailer.js"
   },

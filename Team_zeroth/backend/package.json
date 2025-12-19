@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc",
-    "start": "nodemon dist/index.js"
+    "start": "nodemon dist/index.js",
+    "mailer": "node src/services/mailer.js"
   },
   "keywords": [],
   "author": "",

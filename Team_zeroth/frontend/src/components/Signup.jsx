@@ -143,24 +143,46 @@ export default function SignupPage() {
             Start your journey in creating transparent, AI-verified disaster relief campaigns.
           </p>
 
-          {[ 
-            'AI-Verified Campaigns',
-            'Blockchain Transparency',
-            'Direct Impact'
-          ].map((item, i) => (
-            <div key={i} className="flex items-start gap-4 mb-6">
+          <div className="space-y-6">
+            <div className="flex items-start gap-4">
               <div className="bg-orange-400 rounded-full p-2 mt-1">
                 <Check className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold">{item}</h3>
+                <h3 className="text-xl font-semibold mb-1">AI-Verified Campaigns</h3>
+                <p className="text-orange-50">Automated verification for trust</p>
               </div>
             </div>
-          ))}
+
+            <div className="flex items-start gap-4">
+              <div className="bg-orange-400 rounded-full p-2 mt-1">
+                <Check className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold mb-1">Blockchain Transparency</h3>
+                <p className="text-orange-50">Every transaction recorded</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="bg-orange-400 rounded-full p-2 mt-1">
+                <Check className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold mb-1">Direct Impact</h3>
+                <p className="text-orange-50">Milestone-based fund release</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-16 pt-8 border-t border-orange-400">
+            <p className="text-orange-50">
+              Join 150,000+ families already helped through our platform
+            </p>
+          </div>
         </div>
 
         {/* Right Panel - Form */}
-        
         <div className="bg-white rounded-3xl p-12 shadow-xl">
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h2>
@@ -189,9 +211,9 @@ export default function SignupPage() {
               </label>
               <div className="flex gap-4 mb-2">
                 {[
-                  { id: 1, label: 'Admin' },
-                  { id: 2, label: 'User' },
-                  { id: 3, label: 'Donor' },
+                  { id: 1, label: 'Admin'},
+                  { id: 2, label: 'User'},
+                  { id: 3, label: 'Donor'},
                 ].map((roleOption) => (
                   <button
                     key={roleOption.id}
@@ -215,40 +237,8 @@ export default function SignupPage() {
             {/* Full Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Account Type
+                Full Name
               </label>
-              <div className="flex gap-6">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="role"
-                    value="user"
-                    checked={formData.role === 'user'}
-                    onChange={(e) => handleChange('role', e.target.value)}
-                    className="text-orange-500 focus:ring-orange-500"
-                  />
-                  Beneficiary
-                </label>
-
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="role"
-                    value="donor"
-                    checked={formData.role === 'donor'}
-                    onChange={(e) => handleChange('role', e.target.value)}
-                    className="text-orange-500 focus:ring-orange-500"
-                  />
-                  Donor
-                </label>
-              </div>
-            </div>
-            <br />
-          <form className="space-y-6" onSubmit={handleSubmit}>
-
-            {/* Full Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -268,7 +258,9 @@ export default function SignupPage() {
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
+              </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -288,7 +280,9 @@ export default function SignupPage() {
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -303,9 +297,9 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? <EyeOff /> : <Eye />}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
               {errors.password && (
@@ -315,7 +309,9 @@ export default function SignupPage() {
 
             {/* Confirm Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Confirm Password
+              </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -330,9 +326,9 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showConfirmPassword ? <EyeOff /> : <Eye />}
+                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
               {errors.confirmPassword && (

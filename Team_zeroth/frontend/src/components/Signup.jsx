@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Users,
   Check,
@@ -13,7 +13,7 @@ import {
   UserCircle,
 } from 'lucide-react';
 import { registerUser } from '../api/authApi';
-import { OTPVERIFY_ROUTE } from '../constant/routes';
+import { LOGIN_ROUTE, OTPVERIFY_ROUTE } from '../constant/routes';
 
 export default function SignupPage() {
   const navigate = useNavigate();
@@ -211,7 +211,6 @@ export default function SignupPage() {
               </label>
               <div className="flex gap-4 mb-2">
                 {[
-                  { id: 1, label: 'Admin'},
                   { id: 2, label: 'User'},
                   { id: 3, label: 'Donor'},
                 ].map((roleOption) => (
@@ -385,9 +384,9 @@ export default function SignupPage() {
 
             <p className="text-center text-gray-600">
               Already have an account?{' '}
-              <a href="#" className="text-orange-500 hover:text-orange-600 font-semibold">
+              <Link to={LOGIN_ROUTE} className="text-orange-500 hover:text-orange-600 font-semibold">
                 Sign In
-              </a>
+              </Link>
             </p>
           </form>
         </div>

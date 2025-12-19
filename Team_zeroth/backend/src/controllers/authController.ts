@@ -9,42 +9,76 @@ const OTP_SERVICE = process.env.OTP_SERVICE ?? 'http://localhost:8081';
 const COOKIE_NAME = process.env.COOKIE_NAME ?? 'sid';
 const SESSION_TTL_MINUTES = Number(process.env.SESSION_TTL_MINUTES ?? 60);
 
-// pending registrations stored in-memory until OTP verification completes
-const pendingRegistrations = new Map<string, { name: string; password: string; expiresAt: number }>();
+const ROLE_BY_TYPE = {
+    1: 'ADMIN',
+    2: 'USER',
+    3: 'DONOR',
+} as const;
 
+type Role = typeof ROLE_BY_TYPE[keyof typeof ROLE_BY_TYPE];
+
+type PendingRegistration = {
+    name: string;
+    password: string;
+    type: String,
+    expiresAt: number;
+};
+
+const pendingRegistrations = new Map<string, PendingRegistration>();
 
 export const auth = {
-    register : async (req: Request, res: Response, next: NextFunction) => {
+    register: async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { name, email, password } = req.body;
-            if (!name || !email || !password)
-                return res.status(400).json({ error: 'name, email and password required' });
+            const { name, email, password, type } = req.body;
+
+            if (!name || !email || !password || !type) {
+                return res.status(400).json({ error: 'name, email, password and type required' });
+            }
+
+            const role = ROLE_BY_TYPE[Number(type) as keyof typeof ROLE_BY_TYPE];
+            if (!role) {
+                return res.status(400).json({ error: 'Invalid user type' });
+            }
 
             const exists = await prisma.user.findUnique({ where: { email } });
-            if (exists) return res.status(400).json({ error: 'User already exists' });
+            if (exists) {
+                return res.status(400).json({ error: 'User already exists' });
+            }
 
             const hashed = await argon2.hash(password);
 
-            // send OTP and keep registration pending
             await axios.post(`${OTP_SERVICE}/sendOTP`, { email });
 
-            const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
-            pendingRegistrations.set(email, { name, password: hashed, expiresAt });
+            const expiresAt = Date.now() + 5 * 60 * 1000;
 
-            return res.status(201).json({ message: 'OTP sent. Complete verification to finish registration.' });
-        } catch (err:any) {
-            console.error('AXIOS ERROR:', err.cause || err);
-            throw err;
-            // next(err);
+            pendingRegistrations.set(email, {
+                name,
+                password: hashed,
+                type,
+                expiresAt,
+            });
+
+            return res.status(201).json({
+                message: 'OTP sent. Complete verification to finish registration.',
+            });
+        } catch (err) {
+            console.error('[REGISTER] Error:', err);
+            next(err);
         }
     },
-    verifyOTP :  async (req: Request, res: Response, next: NextFunction) => {
+
+    verifyOTP: async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { email, otp } = req.body;
-            if (!email || !otp) return res.status(400).json({ error: 'email and otp required' });
+
+            if (!email || !otp) {
+                return res.status(400).json({ error: 'email and otp required' });
+            }
 
             const pending = pendingRegistrations.get(email);
-            if (!pending) return res.status(400).json({ error: 'No pending registration for this email' });
+            if (!pending) {
+                return res.status(400).json({ error: 'No pending registration for this email' });
+            }
 
             if (Date.now() > pending.expiresAt) {
                 pendingRegistrations.delete(email);
@@ -52,49 +86,57 @@ export const auth = {
             }
 
             const resp = await axios.post(`${OTP_SERVICE}/verifyOTP`, { email, otp });
-            if (!resp.data || resp.data.success !== true) return res.status(400).json({ error: 'Invalid OTP' });
+            if (!resp.data?.success) {
+                return res.status(400).json({ error: 'Invalid OTP' });
+            }
 
             const exists = await prisma.user.findUnique({ where: { email } });
             if (exists) {
                 pendingRegistrations.delete(email);
                 return res.status(400).json({ error: 'User already exists' });
             }
+            const type = pending.type === '1' ? 'ADMIN' : pending.type === '2' ? 'USER' : 'DONOR';
 
-            const created = await prisma.user.create({
-                data: { name: pending.name, email, password: pending.password, isVerified: true },
+            const user = await prisma.user.create({
+                data: {
+                    name: pending.name,
+                    email,
+                    type,
+                    password: pending.password,
+                    isVerified: true,
+                },
             });
+
             pendingRegistrations.delete(email);
 
-            console.log('User created after OTP verification:', { id: created.id, email: created.email, isVerified: created.isVerified });
-
-            return res.json({ message: 'OTP verified and user registered', userId: created.id });
+            return res.json({
+                message: 'OTP verified and user registered',
+                userId: user.id,
+            });
         } catch (err) {
+            console.error('[VERIFY_OTP] Error:', err);
             next(err);
         }
     },
 
-    login : async (req: Request, res: Response, next: NextFunction) => {
+    login: async (req: Request, res: Response, next: NextFunction) => {
         try {
-            console.log('[LOGIN] Starting login request for:', req.body.email);
             const { email, password } = req.body;
 
-            console.log('[LOGIN] Querying user from DB...');
             const user = await prisma.user.findUnique({ where: { email } });
-            if (!user) return res.status(400).json({ error: 'Invalid credentials' });
+            if (!user || !user.isVerified) {
+                return res.status(400).json({ error: 'Invalid credentials' });
+            }
 
-            console.log('[LOGIN] User found, checking verification status...');
-            if (!user.isVerified) return res.status(403).json({ error: 'User not verified' });
-
-            console.log('[LOGIN] Verifying password with argon2...');
             const valid = await argon2.verify(user.password, password);
-            if (!valid) return res.status(400).json({ error: 'Invalid credentials' });
+            if (!valid) {
+                return res.status(400).json({ error: 'Invalid credentials' });
+            }
 
-            console.log('[LOGIN] Password valid, generating session...');
-            const csrfToken = genCsrfToken();
             const sessionId = uuidv4();
+            const csrfToken = genCsrfToken();
             const expiresAt = new Date(Date.now() + SESSION_TTL_MINUTES * 60 * 1000);
 
-            console.log('[LOGIN] Creating session in DB...');
             await prisma.session.create({
                 data: {
                     id: sessionId,
@@ -104,65 +146,62 @@ export const auth = {
                 },
             });
 
-            console.log('[LOGIN] Session created, setting cookie and responding...');
             res.cookie(COOKIE_NAME, sessionId, {
                 httpOnly: true,
                 sameSite: 'lax',
-                secure: false, // TODO: set to true when using HTTPS
+                secure: false, // set true in prod (HTTPS)
                 maxAge: SESSION_TTL_MINUTES * 60 * 1000,
             });
 
             return res.json({ message: 'Logged in', csrfToken });
         } catch (err) {
-            console.error('[LOGIN] Error during login:', err);
+            console.error('[LOGIN] Error:', err);
             next(err);
         }
-    }, 
+    },
+
     logOut: async (req: Request, res: Response, next: NextFunction) => {
         try {
-            console.log('[LOGOUT] Starting logout request...');
             const sessionId = req.cookies[COOKIE_NAME];
-            if (!sessionId) return res.status(400).json({ error: 'No active session found' });
+            if (!sessionId) {
+                return res.status(400).json({ error: 'No active session' });
+            }
 
-            console.log('[LOGOUT] Invalidating session in DB...');
             await prisma.session.deleteMany({ where: { id: sessionId } });
 
-            console.log('[LOGOUT] Clearing session cookie...');
             res.cookie(COOKIE_NAME, '', {
                 httpOnly: true,
                 sameSite: 'lax',
-                secure: false, // TODO: set to true when using HTTPS
+                secure: false,
                 maxAge: 0,
             });
 
             return res.json({ message: 'Logged out' });
         } catch (err) {
-            console.error('[LOGOUT] Error during logout:', err);
+            console.error('[LOGOUT] Error:', err);
             next(err);
         }
     },
 
     verifyKYC: async (req: Request, res: Response, next: NextFunction) => {
         try {
+            const { userId } = req.body;
 
-            const {userId} = req.body;
-            const userExists = await prisma.user.findUnique({ where: { id: userId } });
-            if (!userExists) return res.status(404).json({ error: 'User not found' });
+            const user = await prisma.user.findUnique({ where: { id: userId } });
+            if (!user) {
+                return res.status(404).json({ error: 'User not found' });
+            }
 
+            await prisma.user.update({
+                where: { id: userId },
+                data: { kycVerified: true },
+            });
 
-            await prisma.user.update({where: { id: userId }, data: { kycVerified: true } });
-
-
-
+            return res.json({ message: 'KYC verified successfully' });
         } catch (err) {
-            console.error('[VERIFY_KYC] Error during KYC verification:', err);
+            console.error('[VERIFY_KYC] Error:', err);
             next(err);
         }
-
-    }
-
-
-}
-
-
+    },
+};
 

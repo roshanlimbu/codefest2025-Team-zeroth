@@ -4,10 +4,9 @@ import prisma from '../prisma.js';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { CampaignCategory, CampaignStatus } from '../generated/prisma/index.js';
+import { CampaignCategory, CampaignStatus } from '../../generated/prisma/index.js';
 
 
-// Configure Multer for local storage
 const uploadDir = 'uploads';
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });

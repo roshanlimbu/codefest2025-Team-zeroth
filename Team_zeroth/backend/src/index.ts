@@ -4,7 +4,7 @@ import cookieParser from 'cookie-parser';
 import 'dotenv/config';
 import authRouter from './routes/auth.js';
 import profileRouter from './routes/profile.js';
-import campaignRouter from './routes/campaign.js';
+// import campaignRouter from './routes/campaign.js';
 
 
 const app = express();
@@ -25,7 +25,7 @@ app.get('/', async (req: Request, res: Response) => {
 
 app.use('/', authRouter);
 app.use('/api', profileRouter);
-app.use('/api/campaigns', campaignRouter);
+// app.use('/api/campaigns', campaignRouter);
 app.use('/uploads', express.static('uploads'));
 
 

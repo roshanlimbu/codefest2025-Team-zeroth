@@ -90,6 +90,30 @@ const HeroSection = () => {
           </div>
         </div>
       </section>
+
+        {/* Features */}
+      <section id="how-it-works" className="py-16 lg:py-24 bg-gray-50">
+        <div className="container mx-auto px-4 lg:px-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-12">
+            How We Build Trust and Transparency
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {features.map((feature, index) => (
+              <div
+                key={feature.title}
+                className="bg-white border border-gray-200 rounded-xl p-6 text-center hover:shadow-lg transition-shadow"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className="w-12 h-12 mx-auto mb-4 bg-orange-500/10 rounded-lg flex items-center justify-center">
+                  <feature.icon className="w-6 h-6 text-orange-500" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">{feature.title}</h3>
+                <p className="text-gray-500 text-sm">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </main>
   );
 };

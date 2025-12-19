@@ -3,7 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import 'dotenv/config';
 import authRouter from './routes/auth.js';
-// import profileRouter from './routes/profile.js';
+import profileRouter from './routes/profile.js';
 
 const app = express();
 app.use(express.json());
@@ -22,7 +22,7 @@ app.get('/', async (req: Request, res: Response) => {
 });
 
 app.use('/', authRouter);
-// app.use('/api', profileRouter);
+app.use('/api', profileRouter);
 
 if (process.env.NODE_ENV !== 'production') {
   app.get('/debug/routes', (req: Request, res: Response) => {

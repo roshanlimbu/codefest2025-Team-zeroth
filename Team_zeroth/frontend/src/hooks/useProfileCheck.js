@@ -16,57 +16,52 @@ const useProfileCheck = () => {
         route => location.pathname.startsWith(route)
     );
 
-    useEffect(() => {
-        const checkProfile = async () => {
-            try {
-                setLoading(true);
-                console.log("[useProfileCheck] Checking profile...");
-                const response = await axiosClient.get("/api/profile");
-                console.log("[useProfileCheck] Profile response:", response.data);
+    // Check if we're on a public page where KYC modal shouldn't show
+    const isPublicPage = location.pathname === '/' || 
+                        location.pathname.startsWith('/donation/') ||
+                        location.pathname === '/how-it-works' ||
+                        location.pathname === '/transparency' ||
+                        location.pathname === '/about' ||
+                        location.pathname === '/contact';
 
-                if (response.status === 200 && response.data.user) {
-                    const userData = response.data.user;
-                    console.log("[useProfileCheck] User data:", userData);
-                    setUser(userData);
+    // make checkProfile callable from other handlers
+    const checkProfile = async () => {
+        try {
+            setLoading(true);
+            const response = await axiosClient.get("/api/profile");
+            if (response.status === 200 && response.data.user) {
+                const userData = response.data.user;
+                setUser(userData);
 
-                    // Check if user is beneficiary and KYC not verified
-                    // Only show modal if not on auth pages
-                    if (
-                        !isAuthPage &&
-                        userData.role === "beneficiary" &&
-                        !userData.kycVerified
-                    ) {
-                        console.log("[useProfileCheck] Showing KYC modal");
-                        setNeedsKYC(true);
-                        setShowKYCModal(true);
-                    }
-                }
-            } catch (error) {
-                console.error("[useProfileCheck] Error:", error.response?.status, error.message);
-                // If 404 or 401, token is expired or invalid
-                if (error.response?.status === 404 || error.response?.status === 401) {
-                    console.log("[useProfileCheck] Token expired, redirecting to login");
-                    // Only redirect if not already on auth pages
-                    if (!isAuthPage) {
-                        // Clear any stored auth data
-                        localStorage.removeItem("auth_token");
-                        localStorage.removeItem("csrfToken");
-
-                        // Redirect to login
-                        navigate(LOGIN_ROUTE);
-                    }
+                // Only show modal if not on auth pages AND not on public pages
+                // and user is a beneficiary-style USER who hasn't submitted or been verified
+                const shouldShowKYC = !isAuthPage && !isPublicPage && userData.type === "USER" && !userData.kycVerified && !userData.kycSubmittedAt;
+                if (shouldShowKYC) {
+                    setNeedsKYC(true);
+                    setShowKYCModal(true);
                 } else {
-                    console.error("Profile check error:", error);
+                    setNeedsKYC(false);
+                    setShowKYCModal(false);
                 }
-            } finally {
-                setLoading(false);
             }
-        };
+        } catch (error) {
+            // If 404 or 401, token is expired or invalid
+            if (error.response?.status === 404 || error.response?.status === 401) {
+                localStorage.removeItem("auth_token");
+                localStorage.removeItem("csrfToken");
+                setUser(null);
+            } else {
+                console.error("Profile check error:", error);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        // Always check profile, regardless of page
-        console.log("[useProfileCheck] Hook mounted, isAuthPage:", isAuthPage);
+    useEffect(() => {
+        // Always check profile on mount / when path changes
         checkProfile();
-    }, [navigate]);
+    }, [navigate, isAuthPage, location.pathname]);
 
     const handleKYCModalClose = () => {
         setShowKYCModal(false);
@@ -80,7 +75,7 @@ const useProfileCheck = () => {
     const handleKYCComplete = () => {
         setShowKYCModal(false);
         setNeedsKYC(false);
-        // Optionally refresh user data
+        // refresh profile to pick up kycSubmittedAt / kycVerified changes
         checkProfile();
     };
 

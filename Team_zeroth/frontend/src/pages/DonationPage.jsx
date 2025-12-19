@@ -1,6 +1,7 @@
+import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { DonationProvider } from "../context/DonationContext"
-import { campaignsData } from "../data/campaignData"
+import axiosClient from "../api/axiosClient"
 import CampaignHero from "../components/donation/CampaignHero"
 import BeneficiaryProfile from "../components/donation/BeneficiaryProfile"
 import MilestoneProgressSection from "../components/donation/MilestoneProgressSection"
@@ -9,17 +10,44 @@ import CampaignOverview from "../components/donation/CampaignOverview"
 
 const DonationPage = () => {
   const { id: campaignId } = useParams()
+  const [campaignData, setCampaignData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  // Find the campaign by ID
-  const campaignData = campaignsData.find(c => c.id === campaignId)
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const resp = await axiosClient.get('/api/campaigns/getcampaignbyid', { params: { id: campaignId } })
+        setCampaignData(resp.data)
+      } catch (err) {
+        console.error('Failed to fetch campaign', err)
+        setError(err.response?.data?.error || err.message || 'Failed to fetch campaign')
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  if (!campaignData) {
+    if (campaignId) load()
+  }, [campaignId])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div>Loading campaign...</div>
+      </div>
+    )
+  }
+
+  if (error || !campaignData) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Campaign Not Found</h1>
             <p className="text-gray-600">The campaign you're looking for doesn't exist.</p>
+            {error && <p className="text-red-500 mt-4">{error}</p>}
           </div>
         </main>
       </div>

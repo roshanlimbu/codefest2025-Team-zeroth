@@ -1,11 +1,47 @@
 import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
-import { Search, Menu, X } from "lucide-react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Search, Menu, X, LogOut, User } from "lucide-react";
 import { navMenu, authMenu } from "../constant/navMenu";
-import { HOME_ROUTE } from "../constant/routes";
+import { HOME_ROUTE, LOGIN_ROUTE, DASHBOARD_ROUTE } from "../constant/routes";
+import useProfileCheck from "../hooks/useProfileCheck";
+import axiosClient from "../api/axiosClient";
 
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const { user } = useProfileCheck();
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        // Clear local storage and cookies first to ensure client-side state is reset
+        try {
+            localStorage.removeItem("auth_token");
+            localStorage.removeItem("csrfToken");
+            localStorage.removeItem("user");
+        } catch (err) {
+            console.warn("Error clearing localStorage during logout:", err);
+        }
+
+        // Attempt to clear all cookies (best-effort)
+        try {
+            document.cookie.split(';').forEach(function (c) {
+                const eqPos = c.indexOf('=');
+                const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
+                document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+            });
+        } catch (err) {
+            console.warn('Could not clear cookies during logout', err);
+        }
+
+        try {
+            await axiosClient.post("/logout");
+        } catch (error) {
+            console.error("Logout error:", error);
+        } finally {
+            // Redirect to home and reload to ensure app resets
+            navigate(HOME_ROUTE);
+            window.location.reload();
+        }
+    };
 
     const navLinkClass = ({ isActive }) =>
         `text-sm font-medium transition-colors px-3 py-2 rounded-md ${isActive
@@ -50,19 +86,43 @@ const Navbar = () => {
                                 className="pl-10 pr-4 py-2 border border-gray-200 rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 w-52 transition-all placeholder:text-gray-400"
                             />
                         </div>
-                        {authMenu.map((authLink) => (
-                            <Link
-                                key={authLink.label}
-                                to={authLink.route}
-                                className={
-                                    authLink.label === "Sign Up"
-                                        ? "bg-linear-to-r from-orange-500 to-amber-500 text-white px-5 py-2 rounded-md text-sm font-semibold hover:opacity-90 transition-opacity shadow-md hover:shadow-lg"
-                                        : "px-4 py-2 text-gray-700 hover:text-orange-500 transition-colors text-sm font-medium rounded-md hover:bg-orange-500/5"
-                                }
-                            >
-                                {authLink.label}
-                            </Link>
-                        ))}
+                        
+                        {user ? (
+                            // Show user info and logout when logged in
+                            <div className="flex items-center gap-3">
+                                <Link
+                                    to={DASHBOARD_ROUTE}
+                                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-orange-500 transition-colors text-sm font-medium rounded-md hover:bg-orange-500/5"
+                                >
+                                    <User className="w-4 h-4" />
+                                    <span>{user.name}</span>
+                                </Link>
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-red-500 transition-colors text-sm font-medium rounded-md hover:bg-red-500/5"
+                                >
+                                    <LogOut className="w-4 h-4" />
+                                    <span>Logout</span>
+                                </button>
+                            </div>
+                        ) : (
+                            // Show login/signup when not logged in
+                            <>
+                                {authMenu.map((authLink) => (
+                                    <Link
+                                        key={authLink.label}
+                                        to={authLink.route}
+                                        className={
+                                            authLink.label === "Sign Up"
+                                                ? "bg-linear-to-r from-orange-500 to-amber-500 text-white px-5 py-2 rounded-md text-sm font-semibold hover:opacity-90 transition-opacity shadow-md hover:shadow-lg"
+                                                : "px-4 py-2 text-gray-700 hover:text-orange-500 transition-colors text-sm font-medium rounded-md hover:bg-orange-500/5"
+                                        }
+                                    >
+                                        {authLink.label}
+                                    </Link>
+                                ))}
+                            </>
+                        )}
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -108,23 +168,46 @@ const Navbar = () => {
                                 />
                             </div>
 
-                            <div className="flex gap-3">
-                                {authMenu.map((authLink) => (
-                                    // console.log(authLink.route),
-
+                            {user ? (
+                                // Show user info and logout when logged in
+                                <div className="space-y-2">
                                     <Link
-                                        key={authLink.label}
-                                        to={authLink.route}
-                                        className={`flex-1 text-center py-2.5 rounded-full text-sm font-medium ${authLink.label === "Sign Up"
-                                            ? "bg-linear-to-r from-orange-500 to-amber-500 text-white font-semibold hover:opacity-90 transition-opacity"
-                                            : "text-gray-700 border border-gray-200 hover:bg-gray-100 transition-colors"
-                                            }`}
+                                        to={DASHBOARD_ROUTE}
+                                        className="flex items-center gap-2 w-full px-4 py-2.5 text-gray-700 border border-gray-200 rounded-full hover:bg-gray-100 transition-colors text-sm font-medium"
+                                        onClick={() => setIsMenuOpen(false)}
                                     >
-                                        {authLink.label}
+                                        <User className="w-4 h-4" />
+                                        <span>{user.name}</span>
                                     </Link>
-                                ))}
-                            </div>
-
+                                    <button
+                                        onClick={() => {
+                                            setIsMenuOpen(false);
+                                            handleLogout();
+                                        }}
+                                        className="flex items-center gap-2 w-full px-4 py-2.5 text-red-600 border border-red-200 rounded-full hover:bg-red-50 transition-colors text-sm font-medium"
+                                    >
+                                        <LogOut className="w-4 h-4" />
+                                        <span>Logout</span>
+                                    </button>
+                                </div>
+                            ) : (
+                                // Show login/signup when not logged in
+                                <div className="flex gap-3">
+                                    {authMenu.map((authLink) => (
+                                        <Link
+                                            key={authLink.label}
+                                            to={authLink.route}
+                                            className={`flex-1 text-center py-2.5 rounded-full text-sm font-medium ${authLink.label === "Sign Up"
+                                                ? "bg-linear-to-r from-orange-500 to-amber-500 text-white font-semibold hover:opacity-90 transition-opacity"
+                                                : "text-gray-700 border border-gray-200 hover:bg-gray-100 transition-colors"
+                                                }`}
+                                            onClick={() => setIsMenuOpen(false)}
+                                        >
+                                            {authLink.label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

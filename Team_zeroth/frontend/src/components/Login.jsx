@@ -39,8 +39,30 @@ export default function Login() {
                 console.log("CSRF token stored:", res.csrfToken);
             }
 
-            // Redirect user to dashboard (adjust path if needed)
-            navigate("/dashboard");
+            // Persist user role (if provided) so routing can adapt
+            if (res.user && res.user.type) {
+                localStorage.setItem("auth_role", res.user.type);
+            }
+
+            // Mark a lightweight auth flag so route checks pass immediately
+            try {
+                localStorage.setItem("auth_token", "1");
+            } catch (err) {
+                console.warn("Could not write auth_token to localStorage", err);
+            }
+
+            // Redirect based on role (use navigate + fallback window.location)
+            const role = res.user?.type || localStorage.getItem("auth_role");
+            console.log("Redirecting based on role:", role);
+            if (role === 'ADMIN') {
+                navigate('/admin/dashboard');
+                // fallback
+                window.location.href = '/admin/dashboard';
+            } else {
+                navigate('/dashboard');
+                // fallback
+                window.location.href = '/dashboard';
+            }
         } catch (err) {
             setError(err.error || err.message || "Login failed. Please try again.");
         } finally {

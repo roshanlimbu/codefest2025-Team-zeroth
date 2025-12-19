@@ -5,6 +5,8 @@ import 'dotenv/config';
 import authRouter from './routes/auth.js';
 import profileRouter from './routes/profile.js';
 import campaignRouter from './routes/campaign.js';
+import adminUserRouter from './routes/adminUser.js';
+import adminCampaignsRouter from './routes/adminCampaigns.js';
 
 
 const app = express();
@@ -53,6 +55,9 @@ app.use('/', authRouter);
 app.use('/api', profileRouter);
 app.use('/api/campaigns', campaignRouter);
 app.use('/uploads', express.static('uploads'));
+// Admin routes (user listing etc.)
+app.use('/admin', adminUserRouter);
+app.use('/admin/campaigns', adminCampaignsRouter);
 
 if (process.env.NODE_ENV !== 'production') {
     app.get('/debug/routes', (req: Request, res: Response) => {

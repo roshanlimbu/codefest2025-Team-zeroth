@@ -9,6 +9,7 @@ router.post('/verifyOTP', auth.verifyOTP);
 router.post('/login', auth.login);
 router.post('/logout', auth.logOut);
 router.post('/verifyKYC', auth.verifyKYC);
+router.post('/rejectKYC', auth.rejectKYC);
 
 router.post('/submitKYC', requireAuth, upload.fields([
     { name: 'citizenship', maxCount: 2 },

@@ -28,6 +28,7 @@ import AuthLayout from "./layouts/AuthLayout";
 import CreateProjectPage from "./pages/CreateProjectPage";
 import Login from "./components/Login";
 import DashboardPage from "./pages/DashboardPage";
+import AdminDashboard from "./pages/AdminDashboard";
 import MilestoneVerification from "./pages/MilestoneVerification";
 import CampaignsPage from "./pages/CampaignsPage";
 
@@ -38,12 +39,15 @@ const Dashboard = () => (
     </div>
 );
 
-// Temporary local auth check
+// Temporary local auth check — use stored tokens if present
 const isAuthenticated = () => {
-    // Use localStorage token for demo; replace with Redux or context later
-    // const authToken = localStorage.getItem("auth_token");
-    // return !!authToken;
-    return true
+  try {
+    const authToken = localStorage.getItem("auth_token");
+    const csrfToken = localStorage.getItem("csrfToken");
+    return !!authToken || !!csrfToken;
+  } catch (err) {
+    return false;
+  }
 };
 
 const router = createBrowserRouter([
@@ -83,6 +87,10 @@ const router = createBrowserRouter([
       {
         path: DASHBOARD_ROUTE,
         element: isAuthenticated() ? <DashboardPage /> : <Navigate to={LOGIN_ROUTE} />
+      },
+      {
+        path: '/admin/dashboard',
+        element: isAuthenticated() ? <AdminDashboard /> : <Navigate to={LOGIN_ROUTE} />
       },
       {
         path: CAMPAIGN_CREATE_ROUTE,

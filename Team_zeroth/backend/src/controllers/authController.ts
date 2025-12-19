@@ -213,7 +213,17 @@ export const auth = {
                 path: '/',
             });
 
-            return res.json({ message: 'Logged in', csrfToken });
+            // Return basic user info along with csrfToken so frontend can redirect based on role
+            return res.json({
+                message: 'Logged in',
+                csrfToken,
+                user: {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    type: user.type,
+                }
+            });
         } catch (err) {
             console.error('[LOGIN] Error:', err);
             next(err);
@@ -260,6 +270,26 @@ export const auth = {
             return res.json({ message: 'KYC verified successfully' });
         } catch (err) {
             console.error('[VERIFY_KYC] Error:', err);
+            next(err);
+        }
+    },
+    // Admin: reject a KYC submission (clears kycSubmittedAt and keeps kycVerified false)
+    rejectKYC: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { userId, reason } = req.body;
+            if (!userId) return res.status(400).json({ error: 'userId required' });
+
+            // Ensure requester is admin
+            const sid = req.cookies?.[process.env.COOKIE_NAME ?? 'sid'];
+            const session = sid ? await prisma.session.findUnique({ where: { id: sid }, include: { user: true } }) : null;
+            if (!session) return res.status(401).json({ error: 'Not authenticated' });
+            if (session.user.type !== 'ADMIN') return res.status(403).json({ error: 'Admin only' });
+
+            await prisma.user.update({ where: { id: userId }, data: { kycSubmittedAt: null, kycVerified: false } });
+
+            return res.json({ message: 'KYC rejected', reason: reason || null });
+        } catch (err) {
+            console.error('[REJECT_KYC] Error:', err);
             next(err);
         }
     },

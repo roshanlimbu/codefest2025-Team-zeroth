@@ -1,4 +1,5 @@
 import { useState } from "react"
+import axiosClient from "../api/axiosClient"
 import FileUploadSection from "../components/create-project/FileUploadSection"
 import MilestoneBuilder from "../components/create-project/MileStoneBuilder"
 import ProjectDetailsSection from "../components/create-project/ProjectDetailsSection"
@@ -158,19 +159,39 @@ const CreateProjectPage = () => {
   }
 
   // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault()
+  const doSubmit = async () => {
+    if (!validateForm()) return
+    try {
+      const form = new FormData()
+      form.append('title', projectData.title)
+      form.append('category', projectData.category)
+      form.append('location', projectData.location)
+      form.append('description', projectData.description)
 
-    if (validateForm()) {
-      console.log("Form submitted successfully", {
-        projectData,
-        milestones,
-        uploadedFiles,
-        totalCost,
+      // Attach files under field name 'media' expected by backend
+      uploadedFiles.slice(0, 5).forEach(f => {
+        if (f.file) form.append('media', f.file)
       })
-      alert("Project submitted successfully!")
-      // Here you would typically send data to your backend
+
+      const resp = await axiosClient.post('/api/campaigns/createcampaign', form, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+
+      if (resp.status === 201) {
+        // redirect to campaigns list
+        window.location.href = '/campaigns'
+      } else {
+        alert('Failed to create project')
+      }
+    } catch (err) {
+      console.error('Create project error', err)
+      alert(err.response?.data?.error || err.message || 'Failed to create project')
     }
+  }
+
+  const handleSubmit = (e) => {
+    if (e && e.preventDefault) e.preventDefault()
+    doSubmit()
   }
 
   return (
@@ -221,7 +242,7 @@ const CreateProjectPage = () => {
                 removeMilestone={removeMilestone}
               />
 
-              <ReviewSubmit totalCost={totalCost} errors={errors} />
+              <ReviewSubmit totalCost={totalCost} errors={errors} onSubmitClick={doSubmit} />
             </div>
 
             {/* Right Column - Live Preview Card */}

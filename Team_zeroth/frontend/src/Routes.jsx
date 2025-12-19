@@ -23,6 +23,13 @@ import SignupPage from "./components/Signup";
 import DonationPage from "./pages/DonationPage";
 import OTPVerificationPage from "./pages/OTPVerificationPage";
 
+const Dashboard = () => (
+    <div className="p-8">
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <p className="text-gray-600 mt-4">Welcome to your dashboard</p>
+    </div>
+);
+
 // Temporary local auth check
 const isAuthenticated = () => {
     // Use localStorage token for demo; replace with Redux or context later
@@ -32,34 +39,35 @@ const isAuthenticated = () => {
 };
 
 const router = createBrowserRouter([
-  // Public Pages
-  {
-    element: <MainLayout />,
-    children: [
-      // { path: `${HOME_ROUTE}/:id`, element: <DonationPage /> },
-      { path: HOME_ROUTE, element: <HomePage /> },
-      { path: `${DONATION_ROUTE}/:id`, element: <DonationPage /> },
-      { path: KYC_ROUTE, element: <KYCPage /> }
-    ]
-  },
-  {
-    element: <UnAuthLayout />,
-    children: [
-      {
-        path: LOGIN_ROUTE,
-        element: !isAuthenticated() ? <AuthPages /> : <Navigate to={DASHBOARD_ROUTE} />
-      },
-      {
-        path: REGISTER_ROUTE,
-        element: !isAuthenticated() ? <SignupPage /> : <Navigate to={DASHBOARD_ROUTE} />
-      },
-      {
-        path: OTPVERIFY_ROUTE,
-        element: <OTPVerificationPage />
-      }
-    ]
-  },
-  // Protected pages
+    // Public Pages
+    {
+        element: <MainLayout />,
+        children: [
+            // { path: `${HOME_ROUTE}/:id`, element: <DonationPage /> },
+            { path: HOME_ROUTE, element: <HomePage /> },
+            { path: `${DONATION_ROUTE}/:id`, element: <DonationPage /> },
+            { path: KYC_ROUTE, element: <KYCPage /> },
+            { path: DASHBOARD_ROUTE, element: <Dashboard /> }
+        ]
+    },
+    {
+        element: <UnAuthLayout />,
+        children: [
+            {
+                path: LOGIN_ROUTE,
+                element: !isAuthenticated() ? <AuthPages /> : <Navigate to={DASHBOARD_ROUTE} />
+            },
+            {
+                path: REGISTER_ROUTE,
+                element: !isAuthenticated() ? <SignupPage /> : <Navigate to={DASHBOARD_ROUTE} />
+            },
+            {
+                path: OTPVERIFY_ROUTE,
+                element: <OTPVerificationPage />
+            }
+        ]
+    },
+    // Protected pages
 
     // 404 fallback
     { path: "*", element: <PageNotFound /> }

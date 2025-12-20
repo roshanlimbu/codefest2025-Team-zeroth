@@ -58,6 +58,11 @@ const HeroSection = () => {
     navigate(CAMPAIGN_ROUTE);
   };
 
+  // Icons for bento panes
+  const LeftIcon = features[0].icon;
+  const MidIcon = features[1].icon;
+  const RightIcon = features[2].icon;
+
 
   return (
     <main>
@@ -80,7 +85,7 @@ const HeroSection = () => {
               Start a Campaign
             </button>
             <button onClick={handleSupportVictim} className="bg-white text-gray-800 px-6 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors border border-gray-200">
-              Support a Victim
+                Browse Campaigns
             </button>
           </div>
         </div>
@@ -89,23 +94,47 @@ const HeroSection = () => {
         {/* Features */}
       <section id="how-it-works" className="py-16 lg:py-24 bg-gray-50">
         <div className="container mx-auto px-4 lg:px-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-12">
-            How We Build Trust and Transparency
+          <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-6">
+            Four steps to rally your community
           </h2>
+          <p className="text-center text-gray-600 mb-8 max-w-2xl mx-auto">From idea to impact, we simplify every stage so you can focus on the cause.</p>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, index) => (
-              <div
-                key={feature.title}
-                className="bg-white border border-gray-200 rounded-xl p-6 text-center hover:shadow-lg transition-shadow"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="w-12 h-12 mx-auto mb-4 bg-orange-500/10 rounded-lg flex items-center justify-center">
-                  <feature.icon className="w-6 h-6 text-orange-500" />
-                </div>
-                <h3 className="font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-500 text-sm">{feature.description}</p>
+            <div className="bg-white border border-gray-200 rounded-xl p-6 text-center hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 mx-auto mb-3 bg-orange-50 rounded-md flex items-center justify-center">
+                <Cpu className="w-5 h-5 text-orange-500" />
               </div>
-            ))}
+              <div className="text-sm text-gray-500 uppercase mb-1">Step 1</div>
+              <h3 className="font-semibold text-gray-900 mb-2">Create your campaign</h3>
+              <p className="text-sm text-gray-600">Set goals, timelines, and impact milestones with our guided builder.</p>
+            </div>
+
+            <div className="bg-white border border-gray-200 rounded-xl p-6 text-center hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 mx-auto mb-3 bg-orange-50 rounded-md flex items-center justify-center">
+                <Link2 className="w-5 h-5 text-orange-500" />
+              </div>
+              <div className="text-sm text-gray-500 uppercase mb-1">Step 2</div>
+              <h3 className="font-semibold text-gray-900 mb-2">Share everywhere</h3>
+              <p className="text-sm text-gray-600">Publish updates, social graphics, and QR posters in multiple languages.</p>
+            </div>
+
+            <div className="bg-white border border-gray-200 rounded-xl p-6 text-center hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 mx-auto mb-3 bg-orange-50 rounded-md flex items-center justify-center">
+                <Award className="w-5 h-5 text-orange-500" />
+              </div>
+              <div className="text-sm text-gray-500 uppercase mb-1">Step 3</div>
+              <h3 className="font-semibold text-gray-900 mb-2">Build trust in real time</h3>
+              <p className="text-sm text-gray-600">Track donations, acknowledge supporters, and keep transparency front and center.</p>
+            </div>
+
+            <div className="bg-white border border-gray-200 rounded-xl p-6 text-center hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 mx-auto mb-3 bg-orange-50 rounded-md flex items-center justify-center">
+                <CheckSquare className="w-5 h-5 text-orange-500" />
+              </div>
+              <div className="text-sm text-gray-500 uppercase mb-1">Step 4</div>
+              <h3 className="font-semibold text-gray-900 mb-2">Access funds securely</h3>
+              <p className="text-sm text-gray-600">Transfer funds directly to verified bank accounts with detailed payout tracking.</p>
+            </div>
           </div>
         </div>
       </section>

@@ -58,7 +58,6 @@ const router = createBrowserRouter([
             { path: HOME_ROUTE, element: <HomePage /> },
             { path: `${DONATION_ROUTE}/:id`, element: <DonationPage /> },
             { path: KYC_ROUTE, element: <KYCPage /> },
-            { path: DASHBOARD_ROUTE, element: <Dashboard /> },
             { path: CAMPAIGN_ROUTE, element: <CampaignsPage /> }
 
         ]

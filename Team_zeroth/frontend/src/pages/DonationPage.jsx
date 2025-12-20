@@ -7,6 +7,8 @@ import BeneficiaryProfile from "../components/donation/BeneficiaryProfile"
 import MilestoneProgressSection from "../components/donation/MilestoneProgressSection"
 import DonationForm from "../components/donation/DonationForm"
 import CampaignOverview from "../components/donation/CampaignOverview"
+import DonationList from "../components/donation/DonationList"
+import ShareCampaign from "../components/donation/ShareCampaign"
 
 const DonationPage = () => {
   const { id: campaignId } = useParams()
@@ -68,6 +70,8 @@ const DonationPage = () => {
               <BeneficiaryProfile />
               <CampaignOverview />
               <MilestoneProgressSection />
+                <ShareCampaign campaign={campaignData} />
+              <DonationList campaignId={campaignData.id} />
             </div>
 
             {/* Right Column - Donation Form */}

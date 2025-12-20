@@ -21,13 +21,63 @@ export const getProfile = async (req: Request, res: Response, next: NextFunction
                 type: true,
                 phoneNumber: true,
                 kycVerified: true,
-                kycSubmittedAt: true,
-                kycDocuments: true,
             }
         });
         if (!user) return res.status(404).json({ error: 'User not found' });
 
-        return res.json({ ok: true, user });
+        // Also fetch user's campaigns (lightweight payload) so frontend can show them on dashboard
+        const campaigns = await prisma.campaign.findMany({
+            where: { creatorId: userId },
+            include: {
+                links: true,
+                milestones: true,
+                donations: true,
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        // Transform campaigns to include computed fields frontend expects
+        const transformed = (campaigns || []).map(c => {
+            const media = (c as any).media || [];
+            const heroImage = Array.isArray(media) && media.length > 0 ? media[0].url : null;
+
+            const fundTarget = (c.milestones || []).reduce((sum: number, m: any) => {
+                const t = typeof m.target === 'bigint' ? Number(m.target) : Number(m.target || 0);
+                return sum + (isNaN(t) ? 0 : t);
+            }, 0);
+
+            // If milestones exist, derive raised amount from milestone `raisedAmount`.
+            // Otherwise fall back to summing direct donations for the campaign (handles legacy or no-milestone campaigns).
+            let fundRaised = 0;
+            if ((c.milestones || []).length > 0) {
+                fundRaised = (c.milestones || []).reduce((sum: number, m: any) => {
+                    const r = typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : Number(m.raisedAmount || 0);
+                    return sum + (isNaN(r) ? 0 : r);
+                }, 0);
+            } else if ((c.donations || []).length > 0) {
+                fundRaised = (c.donations || []).reduce((sum: number, d: any) => {
+                    const a = typeof d.amount === 'bigint' ? Number(d.amount) : Number(d.amount || 0);
+                    return sum + (isNaN(a) ? 0 : a);
+                }, 0);
+            }
+
+            return {
+                id: c.id,
+                title: c.title,
+                category: c.category,
+                location: c.location,
+                heroImage,
+                description: c.description,
+                status: c.status,
+                createdAt: c.createdAt,
+                links: c.links || [],
+                milestones: c.milestones || [],
+                fundTarget,
+                fundRaised,
+            };
+        });
+
+        return res.json({ ok: true, user, campaigns: transformed });
     } catch (err) {
         next(err);
     }

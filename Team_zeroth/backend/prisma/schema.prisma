@@ -26,35 +26,35 @@ enum CampaignStatus {
   REJECTED
 }
 
-
 enum UserType {
-    ADMIN
-    USER
-    DONOR
+  ADMIN
+  USER
+  DONOR
 }
 
 model User {
-  id           String   @id @default(cuid())
-  name         String
-  email        String   @unique
-  password     String
-  isVerified   Boolean  @default(false)
-  type         UserType @default(USER)
-  kycVerified  Boolean  @default(false)
-  
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  password    String
+  isVerified  Boolean  @default(false)
+  type        UserType @default(USER)
+  kycVerified Boolean  @default(false)
+
   // KYC Data
-  phoneNumber  String?
-  kycDocuments Json?    // Stores citizenship, passport, photo, signature URLs
+  phoneNumber    String?
+  kycDocuments   Json? // Stores citizenship, passport, photo, signature URLs
   kycSubmittedAt DateTime?
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  sessions     Session[]
-  campaigns    Campaign[]
+  sessions  Session[]
+  campaigns Campaign[]
 
-  links        CampaignLink[]
-  milestones   CampaignMilestone[]
+  links      CampaignLink[]
+  milestones CampaignMilestone[]
+  donations  Donation[]
 }
 
 model Session {
@@ -65,75 +65,73 @@ model Session {
 
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   @@index([userId])
 }
 
 model Campaign {
-  id          String           @id @default(uuid())
-  creatorId   String
+  id        String @id @default(uuid())
+  creatorId String
 
   title       String
   category    CampaignCategory
   location    String
-  description String @db.LongText
+  description String           @db.LongText
   status      CampaignStatus   @default(DRAFT)
 
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  creator     User             @relation(fields: [creatorId], references: [id])
-  media       Json
-  links       CampaignLink[]
-  milestones  CampaignMilestone[]
+  creator    User                @relation(fields: [creatorId], references: [id])
+  media      Json
+  links      CampaignLink[]
+  milestones CampaignMilestone[]
+  donations  Donation[]
 
   @@index([creatorId])
   @@index([status])
 }
 
-
 model MileStoneReport {
-    id           String   @id @default(cuid())
-    milestoneId  String
+  id                String @id @default(cuid())
+  milestoneId       String
   reportDescription String @db.LongText
-    reportUrl    Json
+  reportUrl         Json
 }
 
-
 model CampaignLink {
-  id         String   @id @default(cuid())
+  id         String @id @default(cuid())
   campaignId String
   userId     String
 
-  label      String
-  url        String
+  label String
+  url   String
 
-  createdAt  DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  campaign   Campaign @relation(fields: [campaignId], references: [id])
-  user       User     @relation(fields: [userId], references: [id])
+  campaign Campaign @relation(fields: [campaignId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
 
   @@index([campaignId])
 }
 
 model CampaignMilestone {
-  id          String   @id @default(cuid())
-  campaignId  String
-  userId      String
+  id         String @id @default(cuid())
+  campaignId String
+  userId     String
 
   title       String
-  description String @db.LongText
+  description String   @db.LongText
   targetDate  DateTime
   isCompleted Boolean  @default(false)
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  campaign    Campaign @relation(fields: [campaignId], references: [id])
-  user        User     @relation(fields: [userId], references: [id])
-  target      BigInt @default(0)
-  raisedAmount BigInt @default(0)
-
+  campaign     Campaign @relation(fields: [campaignId], references: [id])
+  user         User     @relation(fields: [userId], references: [id])
+  target       BigInt   @default(0)
+  raisedAmount BigInt   @default(0)
 
   @@index([campaignId])
 }
@@ -144,5 +142,18 @@ model Item {
   createdAt DateTime @default(now())
 }
 
+model Donation {
+  id         String   @id @default(cuid())
+  campaignId String
+  userId     String?
+  amount     BigInt
+  anonymous  Boolean  @default(false)
+  message    String?
+  createdAt  DateTime @default(now())
 
+  campaign Campaign @relation(fields: [campaignId], references: [id])
+  user     User?    @relation(fields: [userId], references: [id])
 
+  @@index([campaignId])
+  @@index([userId])
+}

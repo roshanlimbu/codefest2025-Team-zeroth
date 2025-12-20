@@ -9,6 +9,7 @@ const useProfileCheck = () => {
     const [showKYCModal, setShowKYCModal] = useState(false);
     const [needsKYC, setNeedsKYC] = useState(false);
     const [kycPending, setKycPending] = useState(false);
+    const [campaigns, setCampaigns] = useState([]);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -33,6 +34,8 @@ const useProfileCheck = () => {
             if (response.status === 200 && response.data.user) {
                 const userData = response.data.user;
                 setUser(userData);
+                // capture campaigns if backend returned them alongside user
+                if (response.data.campaigns) setCampaigns(response.data.campaigns || []);
 
                 // Determine KYC status and UI behavior:
                 // - If user is not verified and has NOT submitted (no kycSubmittedAt) => show "Verify Now" modal
@@ -99,6 +102,7 @@ const useProfileCheck = () => {
         showKYCModal,
         needsKYC,
         kycPending,
+        campaigns,
         handleKYCModalClose,
         handleKYCModalNavigate,
         handleKYCComplete,

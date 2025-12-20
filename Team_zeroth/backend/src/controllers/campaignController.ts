@@ -113,6 +113,7 @@ export const campaignController = {
                     },
                     links: true,
                     milestones: true,
+                    donations: true,
                 },
                 orderBy: { createdAt: 'desc' }
             });
@@ -129,10 +130,18 @@ export const campaignController = {
                     return sum + (isNaN(t) ? 0 : t);
                 }, 0);
 
-                const fundRaised = (c.milestones || []).reduce((sum: number, m: any) => {
-                    const r = typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : Number(m.raisedAmount || 0);
-                    return sum + (isNaN(r) ? 0 : r);
-                }, 0);
+                let fundRaised = 0;
+                if ((c.milestones || []).length > 0) {
+                    fundRaised = (c.milestones || []).reduce((sum: number, m: any) => {
+                        const r = typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : Number(m.raisedAmount || 0);
+                        return sum + (isNaN(r) ? 0 : r);
+                    }, 0);
+                } else if ((c.donations || []).length > 0) {
+                    fundRaised = (c.donations || []).reduce((sum: number, d: any) => {
+                        const a = typeof d.amount === 'bigint' ? Number(d.amount) : Number(d.amount || 0);
+                        return sum + (isNaN(a) ? 0 : a);
+                    }, 0);
+                }
 
                 return {
                     id: c.id,
@@ -169,6 +178,7 @@ export const campaignController = {
                 include: {
                     links: true,
                     milestones: true,
+                    donations: true,
                     creator: {
                         select: { name: true, email: true }
                     }
@@ -186,10 +196,18 @@ export const campaignController = {
                 return sum + (isNaN(t) ? 0 : t);
             }, 0);
 
-            const fundRaised = (campaign.milestones || []).reduce((sum: number, m: any) => {
-                const r = typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : Number(m.raisedAmount || 0);
-                return sum + (isNaN(r) ? 0 : r);
-            }, 0);
+            let fundRaised = 0;
+            if ((campaign.milestones || []).length > 0) {
+                fundRaised = (campaign.milestones || []).reduce((sum: number, m: any) => {
+                    const r = typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : Number(m.raisedAmount || 0);
+                    return sum + (isNaN(r) ? 0 : r);
+                }, 0);
+            } else if ((campaign.donations || []).length > 0) {
+                fundRaised = (campaign.donations || []).reduce((sum: number, d: any) => {
+                    const a = typeof d.amount === 'bigint' ? Number(d.amount) : Number(d.amount || 0);
+                    return sum + (isNaN(a) ? 0 : a);
+                }, 0);
+            }
 
             return res.json({
                 id: campaign.id,
@@ -284,6 +302,73 @@ export const campaignController = {
         }
     }
 ,
+    // Get campaigns for the authenticated user (for dashboard)
+    getMyCampaigns: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const userId = (req as any).user?.id;
+            if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+
+            // Optional query param to filter by status (e.g., ?status=LIVE)
+            const statusFilter = req.query?.status as string | undefined;
+
+            const where: any = { creatorId: userId };
+            if (statusFilter) where.status = statusFilter as any;
+
+            const campaigns = await prisma.campaign.findMany({
+                where,
+                include: {
+                    links: true,
+                    milestones: true,
+                    donations: true,
+                    creator: { select: { id: true, name: true, email: true } }
+                },
+                orderBy: { createdAt: 'desc' }
+            });
+
+            const transformed = campaigns.map(c => {
+                const media = (c.media as any) || [];
+                const heroImage = Array.isArray(media) && media.length > 0 ? media[0].url : null;
+
+                const fundTarget = (c.milestones || []).reduce((sum: number, m: any) => {
+                    const t = typeof m.target === 'bigint' ? Number(m.target) : Number(m.target || 0);
+                    return sum + (isNaN(t) ? 0 : t);
+                }, 0);
+
+                let fundRaised = 0;
+                if ((c.milestones || []).length > 0) {
+                    fundRaised = (c.milestones || []).reduce((sum: number, m: any) => {
+                        const r = typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : Number(m.raisedAmount || 0);
+                        return sum + (isNaN(r) ? 0 : r);
+                    }, 0);
+                } else if ((c.donations || []).length > 0) {
+                    fundRaised = (c.donations || []).reduce((sum: number, d: any) => {
+                        const a = typeof d.amount === 'bigint' ? Number(d.amount) : Number(d.amount || 0);
+                        return sum + (isNaN(a) ? 0 : a);
+                    }, 0);
+                }
+
+                return {
+                    id: c.id,
+                    title: c.title,
+                    category: c.category,
+                    location: c.location,
+                    heroImage,
+                    description: c.description,
+                    status: c.status,
+                    createdAt: c.createdAt,
+                    links: c.links || [],
+                    milestones: c.milestones || [],
+                    creator: c.creator,
+                    fundTarget,
+                    fundRaised,
+                };
+            });
+
+            return res.json(transformed);
+        } catch (err) {
+            next(err);
+        }
+    },
     // Admin: get all campaigns (no filtering) for moderation
     adminGetAllCampaigns: async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -299,6 +384,7 @@ export const campaignController = {
                     creator: true,
                     links: true,
                     milestones: true,
+                    donations: true,
                 },
                 orderBy: { createdAt: 'desc' }
             });
@@ -312,10 +398,18 @@ export const campaignController = {
                     return sum + (isNaN(t) ? 0 : t);
                 }, 0);
 
-                const fundRaised = (c.milestones || []).reduce((sum: number, m: any) => {
-                    const r = typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : Number(m.raisedAmount || 0);
-                    return sum + (isNaN(r) ? 0 : r);
-                }, 0);
+                let fundRaised = 0;
+                if ((c.milestones || []).length > 0) {
+                    fundRaised = (c.milestones || []).reduce((sum: number, m: any) => {
+                        const r = typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : Number(m.raisedAmount || 0);
+                        return sum + (isNaN(r) ? 0 : r);
+                    }, 0);
+                } else if ((c.donations || []).length > 0) {
+                    fundRaised = (c.donations || []).reduce((sum: number, d: any) => {
+                        const a = typeof d.amount === 'bigint' ? Number(d.amount) : Number(d.amount || 0);
+                        return sum + (isNaN(a) ? 0 : a);
+                    }, 0);
+                }
 
                 return {
                     id: c.id,

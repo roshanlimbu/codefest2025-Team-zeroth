@@ -1,6 +1,6 @@
 import { AlertCircle, X } from "lucide-react";
 
-const KYCModal = ({ isOpen, onClose, onNavigateToKYC }) => {
+const KYCModal = ({ isOpen, onClose, onNavigateToKYC, isPending = false }) => {
     if (!isOpen) return null;
 
     return (
@@ -21,11 +21,13 @@ const KYCModal = ({ isOpen, onClose, onNavigateToKYC }) => {
                     </div>
 
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                        KYC Verification Required
+                        {isPending ? "KYC Verification In Process" : "KYC Verification Required"}
                     </h2>
 
                     <p className="text-gray-600 mb-6">
-                        To access full beneficiary features and complete donations, please complete your KYC (Know Your Customer) verification. This helps us ensure security and compliance.
+                        {isPending
+                            ? "We have received your documents. Our team is reviewing them — verification usually completes within 1-3 business days. You will be notified when the status changes."
+                            : "To access full beneficiary features and complete donations, please complete your KYC (Know Your Customer) verification. This helps us ensure security and compliance."}
                     </p>
 
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-left">
@@ -44,14 +46,23 @@ const KYCModal = ({ isOpen, onClose, onNavigateToKYC }) => {
                             onClick={onClose}
                             className="flex-1 px-4 py-2 text-gray-700 font-semibold border border-gray-300 rounded-lg hover:bg-gray-50 transition"
                         >
-                            Remind Me Later
+                            Close
                         </button>
-                        <button
-                            onClick={onNavigateToKYC}
-                            className="flex-1 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition"
-                        >
-                            Verify Now
-                        </button>
+                        {isPending ? (
+                            <button
+                                onClick={onNavigateToKYC}
+                                className="flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
+                            >
+                                View KYC Status
+                            </button>
+                        ) : (
+                            <button
+                                onClick={onNavigateToKYC}
+                                className="flex-1 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition"
+                            >
+                                Verify Now
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>

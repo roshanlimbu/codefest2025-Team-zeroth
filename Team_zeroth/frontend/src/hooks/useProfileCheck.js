@@ -8,6 +8,7 @@ const useProfileCheck = () => {
     const [loading, setLoading] = useState(true);
     const [showKYCModal, setShowKYCModal] = useState(false);
     const [needsKYC, setNeedsKYC] = useState(false);
+    const [kycPending, setKycPending] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -33,15 +34,28 @@ const useProfileCheck = () => {
                 const userData = response.data.user;
                 setUser(userData);
 
-                // Only show modal if not on auth pages AND not on public pages
-                // and user is a beneficiary-style USER who hasn't submitted or been verified
-                const shouldShowKYC = !isAuthPage && !isPublicPage && userData.type === "USER" && !userData.kycVerified && !userData.kycSubmittedAt;
+                // Determine KYC status and UI behavior:
+                // - If user is not verified and has NOT submitted (no kycSubmittedAt) => show "Verify Now" modal
+                // - If user is not verified but HAS submitted (kycSubmittedAt present) => mark as pending (don't show verify modal)
+                // - If user is verified => no modal
+                const isNotVerified = !userData.kycVerified;
+                const hasSubmitted = !!userData.kycSubmittedAt;
+
+                const shouldShowKYC = !isAuthPage && !isPublicPage && userData.type === "USER" && isNotVerified && !hasSubmitted;
+                const isPending = !isAuthPage && !isPublicPage && userData.type === "USER" && isNotVerified && hasSubmitted;
+
                 if (shouldShowKYC) {
                     setNeedsKYC(true);
                     setShowKYCModal(true);
+                    setKycPending(false);
+                } else if (isPending) {
+                    setNeedsKYC(true);
+                    setShowKYCModal(true); // still open modal but show pending state
+                    setKycPending(true);
                 } else {
                     setNeedsKYC(false);
                     setShowKYCModal(false);
+                    setKycPending(false);
                 }
             }
         } catch (error) {
@@ -84,6 +98,7 @@ const useProfileCheck = () => {
         loading,
         showKYCModal,
         needsKYC,
+        kycPending,
         handleKYCModalClose,
         handleKYCModalNavigate,
         handleKYCComplete,

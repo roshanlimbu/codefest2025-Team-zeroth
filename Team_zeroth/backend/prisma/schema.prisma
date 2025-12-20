@@ -77,7 +77,7 @@ model Campaign {
   title       String
   category    CampaignCategory
   location    String
-  description String
+  description String @db.LongText
   status      CampaignStatus   @default(DRAFT)
 
   createdAt   DateTime         @default(now())
@@ -96,7 +96,7 @@ model Campaign {
 model MileStoneReport {
     id           String   @id @default(cuid())
     milestoneId  String
-    reportDescription String
+  reportDescription String @db.LongText
     reportUrl    Json
 }
 
@@ -123,7 +123,7 @@ model CampaignMilestone {
   userId      String
 
   title       String
-  description String
+  description String @db.LongText
   targetDate  DateTime
   isCompleted Boolean  @default(false)
 

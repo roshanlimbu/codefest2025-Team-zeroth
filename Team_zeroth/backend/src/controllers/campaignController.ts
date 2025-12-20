@@ -20,11 +20,17 @@ export const campaignController = {
                 return res.status(401).json({ error: 'Not authenticated' });
             }
 
-            const { title, category, location, description, links } = req.body;
+            const { title, category, location, description: rawDescription, links } = req.body;
 
-            if (!title || !category || !description) {
+            if (!title || !category || !rawDescription) {
                 return res.status(400).json({ error: 'Missing required fields: title, category, description' });
             }
+
+            // Safety: truncate overly long descriptions to avoid DB errors
+            // Trim and cap to 10000 chars as a safety net until schema migration is applied
+            const description = String(rawDescription || '').trim();
+            const MAX_DESCRIPTION = 10000;
+            const safeDescription = description.length > MAX_DESCRIPTION ? description.slice(0, MAX_DESCRIPTION) : description;
 
             // Normalize category from frontend-friendly values to Prisma enum
             const rawCat = String(category || '').trim().toLowerCase();
@@ -71,7 +77,7 @@ export const campaignController = {
                     title,
                     category: mappedCategory as CampaignCategory,
                     location: location || '',
-                    description,
+                    description: safeDescription,
                     creatorId,
                     status: CampaignStatus.DRAFT,
                     media: mediaData as any, // Store as JSON
@@ -226,17 +232,21 @@ export const campaignController = {
                 return res.status(403).json({ error: 'Not authorized to update this campaign' });
             }
 
-            const { title, category, location, description, status } = req.body;
+            const { title, category, location, description: updDesc, status } = req.body;
+
+            // Truncate update description as well
+            const updatedDescription = updDesc ? String(updDesc).trim().slice(0, 10000) : undefined;
+
+            const updateData: any = {};
+            if (title !== undefined) updateData.title = title;
+            if (category !== undefined) updateData.category = category as CampaignCategory;
+            if (location !== undefined) updateData.location = location;
+            if (updatedDescription !== undefined) updateData.description = updatedDescription;
+            if (status !== undefined) updateData.status = status as CampaignStatus;
 
             const campaign = await prisma.campaign.update({
                 where: { id },
-                data: {
-                    title,
-                    category: category as CampaignCategory,
-                    location,
-                    description,
-                    status: status as CampaignStatus
-                }
+                data: updateData
             });
 
             return res.json(campaign);

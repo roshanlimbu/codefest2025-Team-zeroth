@@ -58,7 +58,6 @@ const router = createBrowserRouter([
             { path: HOME_ROUTE, element: <HomePage /> },
             { path: `${DONATION_ROUTE}/:id`, element: <DonationPage /> },
             { path: KYC_ROUTE, element: <KYCPage /> },
-            { path: DASHBOARD_ROUTE, element: <Dashboard /> },
             { path: CAMPAIGN_ROUTE, element: <CampaignsPage /> }
 
         ]
@@ -86,7 +85,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: DASHBOARD_ROUTE,
-        element: isAuthenticated() ? <DashboardPage /> : <Navigate to={LOGIN_ROUTE} />
+        element: <DashboardPage />
       },
       {
         path: '/admin/dashboard',

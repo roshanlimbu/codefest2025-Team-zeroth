@@ -12,13 +12,13 @@ const ProjectDetailsSection = ({ projectData, errors, handleInputChange }) => {
         {/* Project Title */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
-            Project Title <span className="text-red-500">*</span>
+            Campaign Title <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             value={projectData.title}
             onChange={(e) => handleInputChange("title", e.target.value)}
-            placeholder="Enter project title"
+            placeholder="enter campaign title"
             className={`w-full px-3 py-2 border ${
               errors.title ? "border-red-500" : "border-gray-300"
             } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent`}
@@ -26,10 +26,10 @@ const ProjectDetailsSection = ({ projectData, errors, handleInputChange }) => {
           {errors.title && <p className="text-red-500 text-xs">{errors.title}</p>}
         </div>
 
-        {/* Project Category */}
+        {/* Campaign Category */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
-            Project Category <span className="text-red-500">*</span>
+            Campaign Category <span className="text-red-500">*</span>
           </label>
           <select
             value={projectData.category}
@@ -52,13 +52,13 @@ const ProjectDetailsSection = ({ projectData, errors, handleInputChange }) => {
         {/* Location */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
-            Location (Geo-tagged) <span className="text-red-500">*</span>
+            Location <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             value={projectData.location}
             onChange={(e) => handleInputChange("location", e.target.value)}
-            placeholder="Enter location"
+            placeholder="enter your location"
             className={`w-full px-3 py-2 border ${
               errors.location ? "border-red-500" : "border-gray-300"
             } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent`}
@@ -72,10 +72,10 @@ const ProjectDetailsSection = ({ projectData, errors, handleInputChange }) => {
           )}
         </div>
 
-        {/* Project Description */}
+        {/* Campaign Description */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
-            Project Description <span className="text-red-500">*</span>
+            Campaign Description <span className="text-red-500">*</span>
           </label>
           <textarea
             value={projectData.description}

@@ -3,9 +3,9 @@ const FileUploadSection = ({ uploadedFiles, errors, handleFileUpload, removeFile
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
       <div className="p-6 space-y-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Media Upload</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Upload Media</h2>
           <p className="text-gray-600 text-sm">
-            Upload photos and videos to showcase your project. Multiple files supported.
+            Upload photos and videos to showcase your campaign. Multiple files are supported.
           </p>
         </div>
 
@@ -84,7 +84,7 @@ const FileUploadSection = ({ uploadedFiles, errors, handleFileUpload, removeFile
         {/* AI Verification Progress */}
         {uploadedFiles.length > 0 && (
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">AI Verification Progress</label>
+            {/* <label className="block text-sm font-medium text-gray-700">AI Verification Progress</label> */}
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
                 className="bg-orange-500 h-2 rounded-full transition-all"

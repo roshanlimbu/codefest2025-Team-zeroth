@@ -5,8 +5,10 @@ import axiosClient from "../api/axiosClient"
 import CampaignHero from "../components/donation/CampaignHero"
 import BeneficiaryProfile from "../components/donation/BeneficiaryProfile"
 import MilestoneProgressSection from "../components/donation/MilestoneProgressSection"
-import DonationForm from "../components/donation/DonationForm"
 import CampaignOverview from "../components/donation/CampaignOverview"
+import DonationList from "../components/donation/DonationList"
+import DonationForm from "../components/donation/DonationForm"
+import ShareCampaign from "../components/donation/ShareCampaign"
 
 const DonationPage = () => {
   const { id: campaignId } = useParams()
@@ -30,6 +32,44 @@ const DonationPage = () => {
     }
 
     if (campaignId) load()
+  }, [campaignId])
+
+  // If Khalti redirected back with pidx, confirm the payment and persist donation
+  useEffect(() => {
+    const confirmFromKhalti = async () => {
+      try {
+        const sp = new URLSearchParams(window.location.search)
+        const pidx = sp.get('pidx')
+        if (!pidx) return
+
+        const pendingRaw = localStorage.getItem(`khalti_pending_campaign_${campaignId}`)
+        if (!pendingRaw) return
+        const pending = JSON.parse(pendingRaw)
+
+        const resp = await axiosClient.post('/api/payments/khalti/confirm', {
+          pidx,
+          campaignId,
+          anonymous: !!pending.anonymous,
+          message: pending.message || ''
+        })
+
+        if (resp?.data?.ok) {
+          localStorage.removeItem(`khalti_pending_campaign_${campaignId}`)
+          alert('Payment confirmed and donation recorded. Thank you!')
+          const url = new URL(window.location.href)
+          url.searchParams.delete('pidx')
+          window.history.replaceState({}, '', url.toString())
+          window.location.reload()
+        } else {
+          alert('Payment lookup failed: ' + JSON.stringify(resp?.data || ''))
+        }
+      } catch (err) {
+        console.error('Khalti confirm error', err)
+        alert('Error confirming payment: ' + (err?.response?.data?.error || err.message || err))
+      }
+    }
+
+    confirmFromKhalti()
   }, [campaignId])
 
   if (loading) {
@@ -68,9 +108,11 @@ const DonationPage = () => {
               <BeneficiaryProfile />
               <CampaignOverview />
               <MilestoneProgressSection />
+                <ShareCampaign campaign={campaignData} />
+              <DonationList campaignId={campaignData.id} />
             </div>
 
-            {/* Right Column - Donation Form */}
+            {/* Right Column - Donation Form + Khalti Button */}
             <div className="lg:col-span-1">
               <DonationForm />
             </div>

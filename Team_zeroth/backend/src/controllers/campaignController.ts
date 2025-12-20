@@ -20,13 +20,16 @@ export const campaignController = {
                 return res.status(401).json({ error: 'Not authenticated' });
             }
 
-            const { title, category, location, description, links } = req.body;
+            const { title, category, location, description: rawDescription, links } = req.body;
 
-            if (!title || !category || !description) {
+            if (!title || !category || !rawDescription) {
                 return res.status(400).json({ error: 'Missing required fields: title, category, description' });
             }
 
-            // Normalize category from frontend-friendly values to Prisma enum
+            const description = String(rawDescription || '').trim();
+            const MAX_DESCRIPTION = 10000;
+            const safeDescription = description.length > MAX_DESCRIPTION ? description.slice(0, MAX_DESCRIPTION) : description;
+
             const rawCat = String(category || '').trim().toLowerCase();
             const CATEGORY_MAP: Record<string, string> = {
                 medical: 'MEDICAL',
@@ -66,12 +69,24 @@ export const campaignController = {
             }
 
 
+            // Parse milestones from request
+            let parsedMilestones: any[] = [];
+            if (req.body.milestones) {
+                try {
+                    parsedMilestones = typeof req.body.milestones === 'string'
+                        ? JSON.parse(req.body.milestones)
+                        : req.body.milestones;
+                } catch (e) {
+                    return res.status(400).json({ error: 'Invalid milestones format. Expected array.' });
+                }
+            }
+
             const campaign = await prisma.campaign.create({
                 data: {
                     title,
                     category: mappedCategory as CampaignCategory,
                     location: location || '',
-                    description,
+                    description: safeDescription,
                     creatorId,
                     status: CampaignStatus.DRAFT,
                     media: mediaData as any, // Store as JSON
@@ -84,6 +99,19 @@ export const campaignController = {
                             }))
                         }
                     }),
+                    ...(parsedMilestones.length > 0 && {
+                        milestones: {
+                            create: parsedMilestones.map((m: any) => ({
+                                userId: creatorId,
+                                title: m.title,
+                                description: m.description,
+                                targetDate: m.targetDate ? new Date(m.targetDate) : new Date(),
+                                target: BigInt(m.target || 0),
+                                raisedAmount: BigInt(m.raisedAmount || 0),
+                                isCompleted: !!m.isCompleted
+                            }))
+                        }
+                    })
                 },
                 include: {
                     links: true,
@@ -91,7 +119,14 @@ export const campaignController = {
                 }
             });
 
-            return res.status(201).json(campaign);
+            return res.status(201).json({
+                ...campaign,
+                milestones: (campaign.milestones || []).map(m => ({
+                    ...m,
+                    target: typeof m.target === 'bigint' ? Number(m.target) : m.target,
+                    raisedAmount: typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : m.raisedAmount
+                }))
+            });
         } catch (err) {
             next(err);
         }
@@ -107,6 +142,7 @@ export const campaignController = {
                     },
                     links: true,
                     milestones: true,
+                    donations: true,
                 },
                 orderBy: { createdAt: 'desc' }
             });
@@ -123,10 +159,18 @@ export const campaignController = {
                     return sum + (isNaN(t) ? 0 : t);
                 }, 0);
 
-                const fundRaised = (c.milestones || []).reduce((sum: number, m: any) => {
-                    const r = typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : Number(m.raisedAmount || 0);
-                    return sum + (isNaN(r) ? 0 : r);
-                }, 0);
+                let fundRaised = 0;
+                if ((c.milestones || []).length > 0) {
+                    fundRaised = (c.milestones || []).reduce((sum: number, m: any) => {
+                        const r = typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : Number(m.raisedAmount || 0);
+                        return sum + (isNaN(r) ? 0 : r);
+                    }, 0);
+                } else if ((c.donations || []).length > 0) {
+                    fundRaised = (c.donations || []).reduce((sum: number, d: any) => {
+                        const a = typeof d.amount === 'bigint' ? Number(d.amount) : Number(d.amount || 0);
+                        return sum + (isNaN(a) ? 0 : a);
+                    }, 0);
+                }
 
                 return {
                     id: c.id,
@@ -138,7 +182,11 @@ export const campaignController = {
                     status: c.status,
                     createdAt: c.createdAt,
                     links: c.links || [],
-                    milestones: c.milestones || [],
+                    milestones: (c.milestones || []).map((m: any) => ({
+                        ...m,
+                        target: typeof m.target === 'bigint' ? Number(m.target) : m.target,
+                        raisedAmount: typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : m.raisedAmount,
+                    })),
                     creator: c.creator,
                     fundTarget,
                     fundRaised,
@@ -163,6 +211,7 @@ export const campaignController = {
                 include: {
                     links: true,
                     milestones: true,
+                    donations: true,
                     creator: {
                         select: { name: true, email: true }
                     }
@@ -180,10 +229,18 @@ export const campaignController = {
                 return sum + (isNaN(t) ? 0 : t);
             }, 0);
 
-            const fundRaised = (campaign.milestones || []).reduce((sum: number, m: any) => {
-                const r = typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : Number(m.raisedAmount || 0);
-                return sum + (isNaN(r) ? 0 : r);
-            }, 0);
+            let fundRaised = 0;
+            if ((campaign.milestones || []).length > 0) {
+                fundRaised = (campaign.milestones || []).reduce((sum: number, m: any) => {
+                    const r = typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : Number(m.raisedAmount || 0);
+                    return sum + (isNaN(r) ? 0 : r);
+                }, 0);
+            } else if ((campaign.donations || []).length > 0) {
+                fundRaised = (campaign.donations || []).reduce((sum: number, d: any) => {
+                    const a = typeof d.amount === 'bigint' ? Number(d.amount) : Number(d.amount || 0);
+                    return sum + (isNaN(a) ? 0 : a);
+                }, 0);
+            }
 
             return res.json({
                 id: campaign.id,
@@ -195,7 +252,11 @@ export const campaignController = {
                 status: campaign.status,
                 createdAt: campaign.createdAt,
                 links: campaign.links || [],
-                milestones: campaign.milestones || [],
+                milestones: (campaign.milestones || []).map((m: any) => ({
+                    ...m,
+                    target: typeof m.target === 'bigint' ? Number(m.target) : m.target,
+                    raisedAmount: typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : m.raisedAmount,
+                })),
                 creator: campaign.creator,
                 fundTarget,
                 fundRaised,
@@ -226,17 +287,21 @@ export const campaignController = {
                 return res.status(403).json({ error: 'Not authorized to update this campaign' });
             }
 
-            const { title, category, location, description, status } = req.body;
+            const { title, category, location, description: updDesc, status } = req.body;
+
+            // Truncate update description as well
+            const updatedDescription = updDesc ? String(updDesc).trim().slice(0, 10000) : undefined;
+
+            const updateData: any = {};
+            if (title !== undefined) updateData.title = title;
+            if (category !== undefined) updateData.category = category as CampaignCategory;
+            if (location !== undefined) updateData.location = location;
+            if (updatedDescription !== undefined) updateData.description = updatedDescription;
+            if (status !== undefined) updateData.status = status as CampaignStatus;
 
             const campaign = await prisma.campaign.update({
                 where: { id },
-                data: {
-                    title,
-                    category: category as CampaignCategory,
-                    location,
-                    description,
-                    status: status as CampaignStatus
-                }
+                data: updateData
             });
 
             return res.json(campaign);
@@ -274,21 +339,25 @@ export const campaignController = {
         }
     }
 ,
-    // Admin: get all campaigns (no filtering) for moderation
-    adminGetAllCampaigns: async (req: Request, res: Response, next: NextFunction) => {
+    // Get campaigns for the authenticated user (for dashboard)
+    getMyCampaigns: async (req: Request, res: Response, next: NextFunction) => {
         try {
-            // verify admin
-            const sid = req.cookies?.[process.env.COOKIE_NAME ?? 'sid'];
-            if (!sid) return res.status(401).json({ error: 'Not authenticated' });
-            const session = await prisma.session.findUnique({ where: { id: sid }, include: { user: true } });
-            if (!session) return res.status(401).json({ error: 'Invalid session' });
-            if (session.user.type !== 'ADMIN') return res.status(403).json({ error: 'Admin only' });
+            const userId = (req as any).user?.id;
+            if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+
+            // Optional query param to filter by status (e.g., ?status=LIVE)
+            const statusFilter = req.query?.status as string | undefined;
+
+            const where: any = { creatorId: userId };
+            if (statusFilter) where.status = statusFilter as any;
 
             const campaigns = await prisma.campaign.findMany({
+                where,
                 include: {
-                    creator: true,
                     links: true,
                     milestones: true,
+                    donations: true,
+                    creator: { select: { id: true, name: true, email: true } }
                 },
                 orderBy: { createdAt: 'desc' }
             });
@@ -302,10 +371,18 @@ export const campaignController = {
                     return sum + (isNaN(t) ? 0 : t);
                 }, 0);
 
-                const fundRaised = (c.milestones || []).reduce((sum: number, m: any) => {
-                    const r = typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : Number(m.raisedAmount || 0);
-                    return sum + (isNaN(r) ? 0 : r);
-                }, 0);
+                let fundRaised = 0;
+                if ((c.milestones || []).length > 0) {
+                    fundRaised = (c.milestones || []).reduce((sum: number, m: any) => {
+                        const r = typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : Number(m.raisedAmount || 0);
+                        return sum + (isNaN(r) ? 0 : r);
+                    }, 0);
+                } else if ((c.donations || []).length > 0) {
+                    fundRaised = (c.donations || []).reduce((sum: number, d: any) => {
+                        const a = typeof d.amount === 'bigint' ? Number(d.amount) : Number(d.amount || 0);
+                        return sum + (isNaN(a) ? 0 : a);
+                    }, 0);
+                }
 
                 return {
                     id: c.id,
@@ -317,7 +394,85 @@ export const campaignController = {
                     status: c.status,
                     createdAt: c.createdAt,
                     links: c.links || [],
-                    milestones: c.milestones || [],
+                    milestones: (c.milestones || []).map((m: any) => ({
+                        ...m,
+                        target: typeof m.target === 'bigint' ? Number(m.target) : m.target,
+                        raisedAmount: typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : m.raisedAmount,
+                    })),
+                    donations: (c.donations || []).map((d: any) => ({
+                        ...d,
+                        amount: typeof d.amount === 'bigint' ? Number(d.amount) : d.amount,
+                    })),
+                    creator: c.creator,
+                    fundTarget,
+                    fundRaised,
+                };
+            });
+
+            return res.json(transformed);
+        } catch (err) {
+            next(err);
+        }
+    },
+    adminGetAllCampaigns: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const sid = req.cookies?.[process.env.COOKIE_NAME ?? 'sid'];
+            if (!sid) return res.status(401).json({ error: 'Not authenticated' });
+            const session = await prisma.session.findUnique({ where: { id: sid }, include: { user: true } });
+            if (!session) return res.status(401).json({ error: 'Invalid session' });
+            if (session.user.type !== 'ADMIN') return res.status(403).json({ error: 'Admin only' });
+
+            const campaigns = await prisma.campaign.findMany({
+                include: {
+                    creator: true,
+                    links: true,
+                    milestones: true,
+                    donations: true,
+                },
+                orderBy: { createdAt: 'desc' }
+            });
+
+            const transformed = campaigns.map(c => {
+                const media = (c.media as any) || [];
+                const heroImage = Array.isArray(media) && media.length > 0 ? media[0].url : null;
+
+                const fundTarget = (c.milestones || []).reduce((sum: number, m: any) => {
+                    const t = typeof m.target === 'bigint' ? Number(m.target) : Number(m.target || 0);
+                    return sum + (isNaN(t) ? 0 : t);
+                }, 0);
+
+                let fundRaised = 0;
+                if ((c.milestones || []).length > 0) {
+                    fundRaised = (c.milestones || []).reduce((sum: number, m: any) => {
+                        const r = typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : Number(m.raisedAmount || 0);
+                        return sum + (isNaN(r) ? 0 : r);
+                    }, 0);
+                } else if ((c.donations || []).length > 0) {
+                    fundRaised = (c.donations || []).reduce((sum: number, d: any) => {
+                        const a = typeof d.amount === 'bigint' ? Number(d.amount) : Number(d.amount || 0);
+                        return sum + (isNaN(a) ? 0 : a);
+                    }, 0);
+                }
+
+                return {
+                    id: c.id,
+                    title: c.title,
+                    category: c.category,
+                    location: c.location,
+                    heroImage,
+                    description: c.description,
+                    status: c.status,
+                    createdAt: c.createdAt,
+                    links: c.links || [],
+                    milestones: (c.milestones || []).map((m: any) => ({
+                        ...m,
+                        target: typeof m.target === 'bigint' ? Number(m.target) : m.target,
+                        raisedAmount: typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : m.raisedAmount,
+                    })),
+                    donations: (c.donations || []).map((d: any) => ({
+                        ...d,
+                        amount: typeof d.amount === 'bigint' ? Number(d.amount) : d.amount,
+                    })),
                     creator: c.creator,
                     fundTarget,
                     fundRaised,

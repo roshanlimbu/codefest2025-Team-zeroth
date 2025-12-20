@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin, X } from "lucide-react";
 
 const footerLinks = {
   about: {
@@ -34,7 +34,8 @@ const footerLinks = {
 // Add brand colors for hover
 const socialLinks = [
   { icon: Facebook, href: "#", color: "#1877F2" },
-  { icon: Twitter, href: "#", color: "#1DA1F2" },
+  { icon: X, href: "#", color: "#000" },
+  // { icon: Twitter, href: "#", color: "#1DA1F2" },
   { icon: Instagram, href: "#", color: "#E1306C" },
   { icon: Linkedin, href: "#", color: "#0A66C2" },
 ];
@@ -47,17 +48,19 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">W</span>
-              </div>
-              <span className="text-orange-500 font-semibold text-lg">
+              <img
+                src="/image.png"
+                alt="We Raise It"
+                className="w-19 h-19 pr-0.5 object-contain flex-shrink-0"
+              />
+              <span className="text-emerald-800 font-semibold text-lg">
                 We Raise It
               </span>
             </Link>
 
             <p className="text-gray-600 text-sm mb-6 max-w-xs">
-              Connecting hearts to relief. Transparency, trust, and community
-              support for disaster recovery.
+              A community-powered platform helping families rebuild lives
+              through trust, compassion, and collective support.
             </p>
 
             <div className="flex gap-4">
@@ -66,14 +69,14 @@ const Footer = () => {
                   key={index}
                   to={social.href}
                   className="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 transition-colors"
-                  style={{ transition: "all 0.3s ease" }}
+                  style={{ transition: 'all 0.3s ease' }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = social.color;
-                    e.currentTarget.style.color = "#fff";
+                    e.currentTarget.style.color = '#fff';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "#E5E7EB"; // Tailwind gray-200
-                    e.currentTarget.style.color = "#4B5563"; // Tailwind gray-600
+                    e.currentTarget.style.backgroundColor = '#E5E7EB'; // Tailwind gray-200
+                    e.currentTarget.style.color = '#4B5563'; // Tailwind gray-600
                   }}
                 >
                   <social.icon className="w-4 h-4" />
@@ -93,7 +96,7 @@ const Footer = () => {
                   <li key={link.label}>
                     <Link
                       to={link.to}
-                      className="text-gray-600 text-sm hover:text-orange-500 transition-colors"
+                      className="text-gray-600 text-sm hover:text-emerald-500 transition-colors"
                     >
                       {link.label}
                     </Link>

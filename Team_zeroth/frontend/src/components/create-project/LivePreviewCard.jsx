@@ -25,7 +25,7 @@ const LivePreviewCard = ({ projectData, uploadedFiles, milestones }) => {
 
             {/* User */}
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-sm font-semibold">
+              <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white text-sm font-semibold">
                 U
               </div>
               <span className="text-sm font-medium text-gray-900">
@@ -43,15 +43,15 @@ const LivePreviewCard = ({ projectData, uploadedFiles, milestones }) => {
             {projectData.location && (
               <div className="flex items-center gap-3 text-sm text-gray-600">
                 <div className="flex flex-col items-center">
-                  <span className="w-2 h-2 rounded-full bg-orange-500" />
-                  <span className="w-px h-4 bg-orange-200" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <span className="w-px h-4 bg-emerald-200" />
                 </div>
                 <span>{projectData.location}</span>
               </div>
             )}
 
             {projectData.category && (
-              <div className="inline-block px-3 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">
+              <div className="inline-block px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">
                 {projectData.category.charAt(0).toUpperCase() +
                   projectData.category.slice(1)}
               </div>

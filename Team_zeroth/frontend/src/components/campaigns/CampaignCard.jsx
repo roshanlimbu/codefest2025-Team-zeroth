@@ -9,6 +9,7 @@ import {
   Users as Community,
 } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
+import axiosClient from '../../api/axiosClient'
 import { CAMPAIGN_ROUTE, DONATION_ROUTE } from "../../constant/routes"
 
 // Map category to icon
@@ -33,29 +34,36 @@ const CampaignCard = ({ campaign }) => {
       <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer group">
         {/* Campaign Image */}
         <div className="relative h-48 overflow-hidden">
-          <img
-            src={campaign.heroImage}
-            alt={campaign.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
+          {(() => {
+            const hero = campaign.heroImage || (Array.isArray(campaign.media) && campaign.media[0]?.url) || '/placeholder.svg'
+            const isRelative = typeof hero === 'string' && hero.startsWith('/')
+            const src = isRelative && axiosClient?.defaults?.baseURL ? `${axiosClient.defaults.baseURL}${hero}` : hero
+            return (
+              <img
+                src={src}
+                alt={campaign.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            )
+          })()}
 
           {/* Category Badge */}
-          <div className="absolute top-3 right-3 bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
+          <div className="absolute top-3 right-3 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
             {categoryIcons[category]}
             <span className="capitalize">{category}</span>
           </div>
 
-          {campaign.status === "active" && (
+          {String(campaign.status).toUpperCase() === 'LIVE' && (
             <div className="absolute top-3 left-3 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
               <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-              Active
+              Live
             </div>
           )}
         </div>
 
         {/* Content */}
         <div className="p-5">
-          <h3 className="text-lg font-bold text-gray-900 mb-2 truncate group-hover:text-orange-600">
+          <h3 className="text-lg font-bold text-gray-900 mb-2 truncate group-hover:text-emerald-600">
             {campaign.title}
           </h3>
 
@@ -72,25 +80,25 @@ const CampaignCard = ({ campaign }) => {
           {/* Progress */}
           <div className="mb-4">
             <div className="flex justify-between text-sm mb-1">
-              <span className="font-semibold">Rs {campaign.fundRaised.toLocaleString()}</span>
+              <span className="font-semibold">Rs {fundRaised.toLocaleString()}</span>
               <span className="text-gray-500">
-                of Rs {campaign.fundTarget.toLocaleString()}
+                of Rs {fundTarget.toLocaleString()}
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
-                className="bg-orange-500 h-full rounded-full"
+                className="bg-emerald-500 h-full rounded-full"
                 style={{ width: `${Math.min(progressPercentage, 100)}%` }}
               />
             </div>
             <div className="text-right text-xs text-gray-500 mt-1">
-              {progressPercentage.toFixed(1)}% funded
+              {Number.isFinite(progressPercentage) ? progressPercentage.toFixed(1) : '0.0'}% funded
             </div>
           </div>
 
           {/* Donate Button */}
           <button
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2"
+            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2"
           >
             <Heart className="w-4 h-4" />
             Donate Now

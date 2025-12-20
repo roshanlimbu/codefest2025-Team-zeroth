@@ -88,7 +88,7 @@ export default function AdminDashboard() {
                 <aside className="col-span-12 lg:col-span-3">
                     <div className="bg-white p-4 rounded-lg shadow">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 bg-orange-500 rounded flex items-center justify-center text-white font-bold">A</div>
+                            <div className="w-10 h-10 bg-emerald-800 rounded flex items-center justify-center text-white font-bold">A</div>
                             <div>
                                 <div className="font-semibold">Admin</div>
                                 <div className="text-sm text-gray-500">We Raise It</div>
@@ -96,10 +96,10 @@ export default function AdminDashboard() {
                         </div>
 
                         <nav className="space-y-2">
-                            <button onClick={() => setTab('overview')} className={`w-full text-left px-3 py-2 rounded ${tab==='overview' ? 'bg-orange-500 text-white' : 'hover:bg-gray-100'}`}>Overview</button>
-                            <button onClick={() => setTab('users')} className={`w-full text-left px-3 py-2 rounded ${tab==='users' ? 'bg-orange-500 text-white' : 'hover:bg-gray-100'}`}>Users</button>
-                            <button onClick={() => setTab('kyc')} className={`w-full text-left px-3 py-2 rounded ${tab==='kyc' ? 'bg-orange-500 text-white' : 'hover:bg-gray-100'}`}>KYC Queue <span className="ml-2 text-sm text-gray-500">({pendingKYC})</span></button>
-                            <button onClick={() => setTab('campaigns')} className={`w-full text-left px-3 py-2 rounded ${tab==='campaigns' ? 'bg-orange-500 text-white' : 'hover:bg-gray-100'}`}>Campaigns</button>
+                            <button onClick={() => setTab('overview')} className={`w-full text-left px-3 py-2 rounded ${tab==='overview' ? 'bg-emerald-800 text-white' : 'hover:bg-gray-100'}`}>Overview</button>
+                            <button onClick={() => setTab('users')} className={`w-full text-left px-3 py-2 rounded ${tab==='users' ? 'bg-emerald-800 text-white' : 'hover:bg-gray-100'}`}>Users</button>
+                            <button onClick={() => setTab('kyc')} className={`w-full text-left px-3 py-2 rounded ${tab==='kyc' ? 'bg-emerald-800 text-white' : 'hover:bg-gray-100'}`}>KYC Queue <span className="ml-2 text-sm text-gray-500">({pendingKYC})</span></button>
+                            <button onClick={() => setTab('campaigns')} className={`w-full text-left px-3 py-2 rounded ${tab==='campaigns' ? 'bg-emerald-800 text-white' : 'hover:bg-gray-100'}`}>Campaigns</button>
                             <button onClick={loadData} className="w-full text-left px-3 py-2 rounded hover:bg-gray-100 flex items-center gap-2"><RefreshCw className="w-4 h-4"/> Refresh</button>
                         </nav>
                     </div>
@@ -129,7 +129,7 @@ export default function AdminDashboard() {
                                             <div className="text-sm text-gray-500">There are {pendingKYC} submissions awaiting review.</div>
                                         </div>
                                         <div>
-                                            <button onClick={() => setTab('kyc')} className="px-3 py-1 bg-orange-500 text-white rounded">Review</button>
+                                            <button onClick={() => setTab('kyc')} className="px-3 py-1 bg-emerald-800 text-white rounded">Review</button>
                                         </div>
                                     </div>
 
@@ -139,7 +139,7 @@ export default function AdminDashboard() {
                                             <div className="text-sm text-gray-500">Review newly submitted campaigns and publish them live.</div>
                                         </div>
                                         <div>
-                                            <button onClick={() => setTab('campaigns')} className="px-3 py-1 bg-orange-500 text-white rounded">Moderate</button>
+                                            <button onClick={() => setTab('campaigns')} className="px-3 py-1 bg-emerald-800 text-white rounded">Moderate</button>
                                         </div>
                                     </div>
                                 </div>
@@ -193,10 +193,10 @@ export default function AdminDashboard() {
                                                         <span key={k} className="flex items-center gap-2">
                                                             {Array.isArray(v) ? (
                                                                 v.map((fileUrl, idx) => (
-                                                                    <a key={idx} href={String(fileUrl)} target="_blank" rel="noreferrer" className="text-orange-500 underline">{`${k} ${idx+1}`}</a>
+                                                                    <a key={idx} href={String(fileUrl)} target="_blank" rel="noreferrer" className="text-emerald-800 underline">{`${k} ${idx+1}`}</a>
                                                                 ))
                                                             ) : (
-                                                                <a href={String(v)} target="_blank" rel="noreferrer" className="text-orange-500 underline">{k}</a>
+                                                                <a href={String(v)} target="_blank" rel="noreferrer" className="text-emerald-800 underline">{k}</a>
                                                             )}
                                                         </span>
                                                     ))}
@@ -226,7 +226,7 @@ export default function AdminDashboard() {
                                             </div>
                                             <div className="flex gap-2 flex-wrap">
                                                 {['DRAFT','SUBMITTED','VERIFIED','LIVE','PAUSED','COMPLETED','REJECTED'].map(s => (
-                                                    <button key={s} className={`px-2 py-1 rounded ${c.status===s? 'bg-orange-500 text-white' : 'bg-gray-100'}`} onClick={() => updateCampaignStatus(c.id, s)}>{s}</button>
+                                                    <button key={s} className={`px-2 py-1 rounded ${c.status===s? 'bg-emerald-800 text-white' : 'bg-gray-100'}`} onClick={() => updateCampaignStatus(c.id, s)}>{s}</button>
                                                 ))}
                                             </div>
                                         </div>

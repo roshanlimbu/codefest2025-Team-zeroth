@@ -24,13 +24,13 @@ const KYCPage = () => {
     return (
         <div>
             {success && (
-                <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-bounce">
+                <div className="fixed top-4 right-4 bg-emerald-800 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-bounce">
                     ✓ KYC verification submitted successfully!
                 </div>
             )}
 
             {(error || localError) && (
-                <div className="fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+                <div className="fixed top-4 right-4 bg-emerald-800 text-white px-6 py-3 rounded-lg shadow-lg z-50">
                     ✗ {error || localError}
                 </div>
             )}
@@ -39,7 +39,7 @@ const KYCPage = () => {
                 <div className="fixed inset-0 bg-black/50  flex items-center justify-center z-40">
                     <div className="bg-white rounded-lg p-6">
                         <div className="flex flex-col items-center">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-4"></div>
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-800 mb-4"></div>
                             <p className="text-gray-700 font-semibold">Submitting your verification...</p>
                         </div>
                     </div>

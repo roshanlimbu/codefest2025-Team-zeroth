@@ -9,6 +9,7 @@ const MainLayout = () => {
     const {
         loading,
         showKYCModal,
+        kycPending,
         handleKYCModalClose,
         handleKYCModalNavigate,
     } = useProfileCheck();
@@ -20,6 +21,7 @@ const MainLayout = () => {
 
             <KYCModal
                 isOpen={showKYCModal}
+                isPending={kycPending}
                 onClose={handleKYCModalClose}
                 onNavigateToKYC={handleKYCModalNavigate}
             />

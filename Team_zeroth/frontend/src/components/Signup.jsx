@@ -129,54 +129,70 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="max-w-6xl w-full grid md:grid-cols-2 gap-8">
-        {/* Left Panel */}
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl p-12 text-white shadow-2xl">
+        <div className="bg-gradient-to-br from-emerald-700 to-emerald-800 rounded-3xl p-12 text-white shadow-2xl">
           <div className="flex items-center gap-3 mb-12">
-            <div className="bg-white rounded-xl p-2">
-              <Users className="w-8 h-8 text-orange-500" />
+            <div className="bg-white rounded-full p-0 ">
+              <img
+                src="/image.png"
+                alt="We Raise It"
+                className="w-19 h-19  object-contain flex-shrink-0"
+              />
             </div>
             <h1 className="text-3xl font-bold">We Raise It</h1>
           </div>
 
           <h2 className="text-4xl font-bold mb-6">Join Our Community</h2>
-          <p className="text-lg mb-12 text-orange-50">
-            Start your journey in creating transparent, AI-verified disaster relief campaigns.
+          <p className="text-lg mb-12 text-emerald-50">
+            Start your journey in supporting and creating impactful disaster
+            relief campaigns.
           </p>
 
           <div className="space-y-6">
             <div className="flex items-start gap-4">
-              <div className="bg-orange-400 rounded-full p-2 mt-1">
+              <div className="bg-emerald-800 rounded-full p-2 mt-1">
                 <Check className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-1">AI-Verified Campaigns</h3>
-                <p className="text-orange-50">Automated verification for trust</p>
+                <h3 className="text-xl font-semibold mb-1">
+                  Verified Campaigns
+                </h3>
+                <p className="text-emerald-50">
+                  Manual review for authenticity
+                </p>
               </div>
             </div>
 
             <div className="flex items-start gap-4">
-              <div className="bg-orange-400 rounded-full p-2 mt-1">
+              <div className="bg-emerald-800 rounded-full p-2 mt-1">
                 <Check className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-1">Blockchain Transparency</h3>
-                <p className="text-orange-50">Every transaction recorded</p>
+                <h3 className="text-xl font-semibold mb-1">
+                  Transparent Updates
+                </h3>
+                <p className="text-emerald-50">
+                  Regular progress and fund usage reports
+                </p>
               </div>
             </div>
 
             <div className="flex items-start gap-4">
-              <div className="bg-orange-400 rounded-full p-2 mt-1">
+              <div className="bg-emerald-800 rounded-full p-2 mt-1">
                 <Check className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-1">Direct Impact</h3>
-                <p className="text-orange-50">Milestone-based fund release</p>
+                <h3 className="text-xl font-semibold mb-1">
+                  Community Support
+                </h3>
+                <p className="text-emerald-50">
+                  Connect with donors and beneficiaries
+                </p>
               </div>
             </div>
           </div>
 
-          <div className="mt-16 pt-8 border-t border-orange-400">
-            <p className="text-orange-50">
+          <div className="mt-16 pt-8 border-t border-emerald-400">
+            <p className="text-emerald-50">
               Join 150,000+ families already helped through our platform
             </p>
           </div>
@@ -185,7 +201,9 @@ export default function SignupPage() {
         {/* Right Panel - Form */}
         <div className="bg-white rounded-3xl p-12 shadow-xl">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              Create Account
+            </h2>
             <p className="text-gray-500">Fill in your details to get started</p>
           </div>
 
@@ -211,8 +229,8 @@ export default function SignupPage() {
               </label>
               <div className="flex gap-4 mb-2">
                 {[
-                  { id: 2, label: 'User'},
-                  { id: 3, label: 'Donor'},
+                  { id: 2, label: 'User' },
+                  { id: 3, label: 'Donor' },
                 ].map((roleOption) => (
                   <button
                     key={roleOption.id}
@@ -220,8 +238,8 @@ export default function SignupPage() {
                     onClick={() => handleChange('role', roleOption.id)}
                     className={`flex-1 p-4 rounded-lg border text-left transition ${
                       formData.role === roleOption.id
-                        ? 'bg-orange-500 text-white border-orange-500'
-                        : 'bg-white text-gray-700 border-gray-300 hover:border-orange-500 hover:bg-orange-50'
+                        ? 'bg-emerald-800 text-white'
+                        : 'bg-white text-gray-700 border-gray-300 hover:border-emerald-500 hover:bg-emerald-50'
                     }`}
                   >
                     <h4 className="font-semibold">{roleOption.label}</h4>
@@ -245,7 +263,7 @@ export default function SignupPage() {
                   placeholder="John Doe"
                   value={formData.fullName}
                   onChange={(e) => handleChange('fullName', e.target.value)}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition ${
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition ${
                     errors.fullName ? 'border-red-300' : 'border-gray-300'
                   }`}
                 />
@@ -267,7 +285,7 @@ export default function SignupPage() {
                   placeholder="you@example.com"
                   value={formData.email}
                   onChange={(e) => handleChange('email', e.target.value)}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition ${
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition ${
                     errors.email ? 'border-red-300' : 'border-gray-300'
                   }`}
                 />
@@ -289,16 +307,20 @@ export default function SignupPage() {
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={(e) => handleChange('password', e.target.value)}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition ${
+                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition ${
                     errors.password ? 'border-red-300' : 'border-gray-300'
                   }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-700 hover:text-gray-800"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
               {errors.password && (
@@ -317,9 +339,13 @@ export default function SignupPage() {
                   type={showConfirmPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={formData.confirmPassword}
-                  onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition ${
-                    errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
+                  onChange={(e) =>
+                    handleChange('confirmPassword', e.target.value)
+                  }
+                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition ${
+                    errors.confirmPassword
+                      ? 'border-red-300'
+                      : 'border-gray-300'
                   }`}
                 />
                 <button
@@ -327,11 +353,17 @@ export default function SignupPage() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.confirmPassword}
+                </p>
               )}
             </div>
 
@@ -348,15 +380,21 @@ export default function SignupPage() {
                       setErrors((prev) => ({ ...prev, terms: '' }));
                     }
                   }}
-                  className="mt-1 w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+                  className="mt-1 w-4 h-4 text-emerald-500 border-gray-300 rounded focus:ring-emerald-500"
                 />
                 <label htmlFor="terms" className="text-sm text-gray-600">
                   I agree to the{' '}
-                  <a href="#" className="text-orange-500 hover:text-orange-600 font-medium">
+                  <a
+                    href="#"
+                    className="text-emerald-700 hover:text-emerald-800 font-medium"
+                  >
                     Terms & Conditions
                   </a>{' '}
                   and{' '}
-                  <a href="#" className="text-orange-500 hover:text-orange-600 font-medium">
+                  <a
+                    href="#"
+                    className="text-emerald-700 hover:text-emerald-800 font-medium"
+                  >
                     Privacy Policy
                   </a>
                 </label>
@@ -370,7 +408,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              className="w-full bg-emerald-700 hover:bg-emerald-800 disabled:bg-orange-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
@@ -384,7 +422,10 @@ export default function SignupPage() {
 
             <p className="text-center text-gray-600">
               Already have an account?{' '}
-              <Link to={LOGIN_ROUTE} className="text-orange-500 hover:text-orange-600 font-semibold">
+              <Link
+                to={LOGIN_ROUTE}
+                className="text-emerald-700 hover:text-emerald-800 font-semibold"
+              >
                 Sign In
               </Link>
             </p>

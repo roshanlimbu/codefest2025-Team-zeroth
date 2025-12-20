@@ -149,6 +149,7 @@ model Donation {
   amount     BigInt
   anonymous  Boolean  @default(false)
   message    String?
+  khaltiPidx String?  @unique
   createdAt  DateTime @default(now())
 
   campaign Campaign @relation(fields: [campaignId], references: [id])

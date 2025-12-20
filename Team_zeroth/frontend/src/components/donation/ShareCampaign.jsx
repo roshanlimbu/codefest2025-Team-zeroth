@@ -22,8 +22,9 @@ const ShareCampaign = ({ campaign }) => {
     }
   }
 
-  // Use Google Chart API for quick QR image generation (no extra deps)
-  const qrSrc = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(url)}`
+  // Use WR provided QR image URL as primary QR image
+  const wrQrUrl = 'https://sp-ao.shortpixel.ai/client/to_webp,q_glossy,ret_img,w_300,h_300/https://prooftag.net/wp-content/uploads/2021/07/QR-Code.png'
+  const qrSrc = wrQrUrl
 
   // Fallback SVG data URL (simple QR-like placeholder) used when external QR fails
   const fallbackSvg = `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='200' height='200' fill='%23ffffff'/><rect x='10' y='10' width='40' height='40' fill='%23000'/><rect x='150' y='10' width='40' height='40' fill='%23000'/><rect x='10' y='150' width='40' height='40' fill='%23000'/><rect x='70' y='70' width='20' height='20' fill='%23000'/><rect x='100' y='70' width='20' height='20' fill='%23000'/><rect x='70' y='100' width='20' height='20' fill='%23000'/><rect x='100' y='100' width='20' height='20' fill='%23000'/></svg>`

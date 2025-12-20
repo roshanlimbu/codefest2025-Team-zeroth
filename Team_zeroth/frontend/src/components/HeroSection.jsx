@@ -21,9 +21,9 @@ const features = [
 ];
 
 const stats = [
-  { value: "150,000+", label: "Families Helped" },
-  { value: "$2.5M+", label: "Funds Released Transparently" },
-  { value: "99%", label: "AI-Verified Campaigns" },
+  { value: "Rs 1,50,000+", label: "Families Helped" },
+  { value: "Rs 25,00,000+", label: "Funds Released Transparently" },
+  { value: "98%+", label: "Verified Campaigns" },
 ];
 
 const HeroSection = () => {

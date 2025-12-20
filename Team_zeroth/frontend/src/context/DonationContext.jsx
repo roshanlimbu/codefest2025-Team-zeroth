@@ -109,26 +109,69 @@ const DonationProvider = ({ children, campaignData }) => {
         // Actions
         handleDonation: async () => {
             const amount = Number(customAmount || selectedAmount)
-            const payload = {
+            if (!donationMessage || !donationMessage.trim()) {
+                alert('Please enter a message before donating.')
+                return
+            }
+
+            const amountPaisa = Math.round(amount * 100)
+            const purchase_order_id = `don-${providerData.campaign.id}-${Date.now()}`
+            const purchase_order_name = `Donation to ${providerData.campaign.id}`
+            const return_url = `${window.location.origin}/donation/${providerData.campaign.id}`
+            const website_url = window.location.origin
+
+            // Try to get logged-in user's name from profile; if not available, prompt
+            let donorName = ''
+            const isLoggedIn = Boolean(localStorage.getItem('auth_token') || localStorage.getItem('csrfToken'))
+            if (isLoggedIn) {
+                try {
+                    const prof = await axiosClient.get('/api/profile')
+                    donorName = prof?.data?.user?.name || ''
+                } catch (e) {
+                    // ignore
+                }
+            }
+            if (!donorName) {
+                donorName = window.prompt('Please enter your full name for the donation (will appear with the donation)') || ''
+                if (!donorName) {
+                    alert('Name is required to proceed with payment')
+                    return
+                }
+            }
+
+            const customer_info = { name: donorName }
+
+            // Persist pending donation metadata so confirm can persist after redirect
+            const pending = {
+                purchase_order_id,
                 campaignId: providerData.campaign.id,
                 amount,
                 anonymous: !!isAnonymous,
                 message: donationMessage || '',
+                donorName
             }
+            try { localStorage.setItem(`khalti_pending_campaign_${providerData.campaign.id}`, JSON.stringify(pending)) } catch (e) { /* ignore */ }
 
             try {
-                // Try calling backend donation endpoint if available
-                const resp = await axiosClient.post('/api/donations/create', payload)
-                if (resp?.status === 201 || resp?.status === 200) {
-                    alert(`Thank you — your donation of Rs ${amount} was received.`)
-                } else {
-                    console.log('Donation response:', resp)
-                    alert(`Donation submitted. Response status: ${resp.status}`)
+                const resp = await axiosClient.post('/api/payments/khalti/initiate', {
+                    amount: amountPaisa,
+                    purchase_order_id,
+                    purchase_order_name,
+                    return_url,
+                    website_url,
+                    customer_info
+                })
+
+                if (resp?.data?.ok && resp.data.data?.payment_url) {
+                    window.location.href = resp.data.data.payment_url
+                    return
                 }
+
+                console.error('Khalti initiate unexpected response', resp)
+                alert('Failed to initiate Khalti payment')
             } catch (err) {
-                // If endpoint not found or server unavailable, fall back to client-only behavior
-                console.warn('Donation endpoint failed or unavailable, falling back to local confirmation', err?.response || err)
-                alert(`Thank you for your donation of Rs ${amount}! (local confirmation)`)
+                console.error('Khalti initiate error', err)
+                alert(err?.response?.data?.error || err.message || 'Khalti init failed')
             }
         },
     }

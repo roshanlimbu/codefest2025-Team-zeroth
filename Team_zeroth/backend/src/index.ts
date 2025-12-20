@@ -8,6 +8,7 @@ import campaignRouter from './routes/campaign.js';
 import adminUserRouter from './routes/adminUser.js';
 import adminCampaignsRouter from './routes/adminCampaigns.js';
 import donationRouter from './routes/donation.js';
+import khaltiRouter from './routes/khalti.js';
 
 
 const app = express();
@@ -57,6 +58,7 @@ app.use('/api', profileRouter);
 app.use('/api/campaigns', campaignRouter);
 app.use('/uploads', express.static('uploads'));
 app.use('/api/donations', donationRouter);
+app.use('/api/payments/khalti', khaltiRouter);
 // Admin routes (user listing etc.)
 app.use('/admin', adminUserRouter);
 app.use('/admin/campaigns', adminCampaignsRouter);

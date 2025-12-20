@@ -52,9 +52,7 @@ const HomePage = () => {
       
 
       {/* About Us Section (new) */}
-      <div className="p-4 text-center">
         <AboutUs />
-      </div>
       
     </div>
   );

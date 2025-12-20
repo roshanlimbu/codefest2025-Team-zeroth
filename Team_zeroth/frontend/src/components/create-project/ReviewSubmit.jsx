@@ -24,7 +24,7 @@ const ReviewSubmit = ({ totalCost, errors, onSubmitClick }) => {
         <button
           type="submit"
           onClick={(e) => { if (onSubmitClick) { e.preventDefault(); onSubmitClick(); } }}
-          className="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+          className="w-full px-4 py-3 bg-emerald-500 hover:bg-emerald-800 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path

@@ -76,13 +76,13 @@ const HeroSection = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={handleStartCampaign}
-              className="bg-emerald-700 text-white px-6 py-3 rounded-lg font-medium hover:bg-emerald-800 transition-colors"
+              className=" hover:cursor-pointer bg-emerald-700 text-white px-6 py-3 rounded-lg font-medium hover:bg-emerald-800 transition-colors"
             >
               Start a Campaign
             </button>
             <button
               onClick={handleSupportVictim}
-              className="bg-white text-stone-800 px-6 py-3 rounded-lg font-medium hover:bg-stone-100 transition-colors border border-stone-200"
+              className="hover:cursor-pointer bg-white text-stone-800 px-6 py-3 rounded-lg font-medium hover:bg-stone-100 transition-colors border border-stone-200"
             >
               Browse Campaigns
             </button>
@@ -183,19 +183,19 @@ const HeroSection = () => {
               <p className="text-white/90 mb-6 text-sm">
                 Share your story and let the community stand with you.
               </p>
-              <button className="bg-white text-stone-800 px-6 py-3 rounded-lg font-medium hover:bg-stone-100 transition-colors">
+              <button className=" hover:cursor-pointer bg-white text-stone-800 px-6 py-3 rounded-lg font-medium hover:bg-stone-100 transition-colors">
                 Start a Campaign
               </button>
             </div>
 
-            <div className="bg-emerald-800 rounded-xl p-8 text-center">
+            <div className=" bg-emerald-800 rounded-xl p-8 text-center">
               <h3 className="text-2xl font-bold text-white mb-3">
                 Make a Difference
               </h3>
               <p className="text-white/90 mb-6 text-sm">
                 Support families in need and be part of meaningful change.
               </p>
-              <button className="bg-white text-stone-800 px-6 py-3 rounded-lg font-medium hover:bg-stone-100 transition-colors">
+              <button className="hover:cursor-pointer bg-white text-stone-800 px-6 py-3 rounded-lg font-medium hover:bg-stone-100 transition-colors">
                 Find a Cause
               </button>
             </div>

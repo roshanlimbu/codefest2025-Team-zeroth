@@ -3,9 +3,9 @@ const FileUploadSection = ({ uploadedFiles, errors, handleFileUpload, removeFile
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
       <div className="p-6 space-y-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Media Upload</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Upload Media</h2>
           <p className="text-gray-600 text-sm">
-            Upload photos and videos to showcase your project. Multiple files supported.
+            Upload photos and videos to showcase your campaign. Multiple files are supported.
           </p>
         </div>
 

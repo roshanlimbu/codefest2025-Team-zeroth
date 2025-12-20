@@ -59,11 +59,11 @@ const CampaignsPage = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <main className="flex-1">
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white py-16">
+        <div className="bg-gradient-to-r from-emerald-700 to-emerald-800 text-white py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <h1 className="text-4xl md:text-5xl font-bold mb-4">Nepal Support Campaigns</h1>
-              <p className="text-xl text-orange-100 max-w-2xl mx-auto">
+              <p className="text-xl text-emerald-100 max-w-2xl mx-auto">
                 Support communities across Nepal. Every contribution makes a difference.
               </p>
             </div>
@@ -82,7 +82,7 @@ const CampaignsPage = () => {
                   placeholder="Search by location or campaign name..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 />
               </div>
 
@@ -92,7 +92,7 @@ const CampaignsPage = () => {
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none bg-white"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent appearance-none bg-white"
                 >
                   {categories.map((cat) => (
                     <option key={cat} value={cat}>
@@ -109,17 +109,17 @@ const CampaignsPage = () => {
           {/* Stats Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-3xl font-bold text-orange-500 mb-2">{campaigns.length}</div>
+              <div className="text-3xl font-bold text-emerald-500 mb-2">{campaigns.length}</div>
               <div className="text-gray-600">Active Campaigns</div>
             </div>
             <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-3xl font-bold text-orange-500 mb-2">
+              <div className="text-3xl font-bold text-emerald-500 mb-2">
                 {campaigns.reduce((sum, c) => sum + ((c.affectedPeople) || 0), 0)}
               </div>
               <div className="text-gray-600">People Affected</div>
             </div>
             <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-3xl font-bold text-orange-500 mb-2">
+              <div className="text-3xl font-bold text-emerald-800 mb-2">
                 Rs {campaigns.reduce((sum, c) => sum + ((c.fundRaised) || 0), 0).toLocaleString()}
               </div>
               <div className="text-gray-600">Total Raised</div>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Search, Menu, X, LogOut, User } from "lucide-react";
 import { navMenu, authMenu } from "../constant/navMenu";
+import { HOW_IT_WORKS_ROUTE  } from "../constant/routes";
 import { HOME_ROUTE, LOGIN_ROUTE, DASHBOARD_ROUTE } from "../constant/routes";
 import useProfileCheck from "../hooks/useProfileCheck";
 import axiosClient from "../api/axiosClient";
@@ -42,6 +43,24 @@ const Navbar = () => {
                 : "text-stone-600 hover:text-teal-700 hover:bg-teal-700/5"
         }`;
 
+    // Custom scroll for How it Works
+    const handleNavClick = (route, e) => {
+        if (route === HOW_IT_WORKS_ROUTE) {
+            e.preventDefault();
+            const el = document.getElementById("how-it-works");
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth" });
+            } else {
+                // If not on home, go home and scroll after load
+                navigate(HOME_ROUTE);
+                setTimeout(() => {
+                    const el2 = document.getElementById("how-it-works");
+                    if (el2) el2.scrollIntoView({ behavior: "smooth" });
+                }, 600);
+            }
+        }
+    };
+
     return (
         <nav className="bg-[#FBF7ED] border-b border-stone-200 sticky top-0 z-50">
             <div className="container mx-auto px-4 lg:px-8">
@@ -66,6 +85,7 @@ const Navbar = () => {
                                 key={link.label}
                                 to={link.route}
                                 className={navLinkClass}
+                                onClick={e => handleNavClick(link.route, e)}
                             >
                                 {link.label}
                             </NavLink>

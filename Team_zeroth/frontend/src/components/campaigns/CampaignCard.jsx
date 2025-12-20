@@ -48,7 +48,7 @@ const CampaignCard = ({ campaign }) => {
           })()}
 
           {/* Category Badge */}
-          <div className="absolute top-3 right-3 bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
+          <div className="absolute top-3 right-3 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
             {categoryIcons[category]}
             <span className="capitalize">{category}</span>
           </div>
@@ -63,7 +63,7 @@ const CampaignCard = ({ campaign }) => {
 
         {/* Content */}
         <div className="p-5">
-          <h3 className="text-lg font-bold text-gray-900 mb-2 truncate group-hover:text-orange-600">
+          <h3 className="text-lg font-bold text-gray-900 mb-2 truncate group-hover:text-emerald-600">
             {campaign.title}
           </h3>
 
@@ -87,7 +87,7 @@ const CampaignCard = ({ campaign }) => {
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
-                className="bg-orange-500 h-full rounded-full"
+                className="bg-emerald-500 h-full rounded-full"
                 style={{ width: `${Math.min(progressPercentage, 100)}%` }}
               />
             </div>
@@ -98,7 +98,7 @@ const CampaignCard = ({ campaign }) => {
 
           {/* Donate Button */}
           <button
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2"
+            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2"
           >
             <Heart className="w-4 h-4" />
             Donate Now

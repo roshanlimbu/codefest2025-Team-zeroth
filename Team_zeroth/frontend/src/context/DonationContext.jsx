@@ -58,9 +58,9 @@ const DonationProvider = ({ children, campaignData }) => {
 
         const opts = []
         if (base <= 0) {
-            opts.push({ amount: 100, impact: `Support with a Rs 100 donation` })
-            opts.push({ amount: 500, impact: `Support with a Rs 500 donation` })
-            opts.push({ amount: 1000, impact: `Support with a Rs 1000 donation` })
+            opts.push({ amount: 100, impact: `Support with  Rs 100 donation` })
+            opts.push({ amount: 500, impact: `Support with  Rs 500 donation` })
+            opts.push({ amount: 1000, impact: `Support with  Rs 1000 donation` })
         } else if (base <= 100) {
             const a = Math.max(10, Math.ceil(base))
             opts.push({ amount: a, impact: `Help close this milestone (${a} remaining)` })

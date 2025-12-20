@@ -32,7 +32,7 @@ const BeneficiaryProfile = () => {
             className="w-20 h-20 rounded-full object-cover flex-shrink-0"
           />
         ) : (
-          <div className="w-20 h-20 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center font-bold text-xl flex-shrink-0">
+          <div className="w-20 h-20 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xl flex-shrink-0">
             {initials || 'NA'}
           </div>
         )}

@@ -58,7 +58,7 @@ const KYCModal = ({ isOpen, onClose, onNavigateToKYC, isPending = false }) => {
                         ) : (
                             <button
                                 onClick={onNavigateToKYC}
-                                className="flex-1 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition"
+                                className="flex-1 px-4 py-2 bg-green-800 text-white font-semibold rounded-lg hover:bg-green-700 transition"
                             >
                                 Verify Now
                             </button>

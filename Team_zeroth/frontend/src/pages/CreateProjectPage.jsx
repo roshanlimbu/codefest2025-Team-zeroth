@@ -202,20 +202,19 @@ const CreateProjectPage = () => {
         <div className="mb-12 max-w-3xl flex flex-col justify-center items-center">
           {/* subtle context label */}
           <span className="inline-block text-sm text-gray-500 mb-3">
-            Project setup
+            Campaign Setup
           </span>
 
           <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4 leading-snug">
-            Create Your Project
+            Create Your Campaign
           </h1>
 
           {/* gentle divider */}
-          <div className="w-14 h-0.5 bg-orange-400 mb-5" />
+          <div className="w-14 h-0.5 bg-emerald-600 mb-5" />
 
           <p className="text-gray-600 text-base md:text-lg leading-relaxed text-center max-w-2xl mx-auto">
-            Share clear and honest details about your project.
+            Share clear and honest details about your campaign.
             <br className="hidden sm:block" />
-            Our AI verification process helps build trust and ensures transparency for everyone involved.
           </p>
 
         </div>

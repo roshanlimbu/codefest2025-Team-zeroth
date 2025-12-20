@@ -135,6 +135,41 @@ const donationController = {
             next(err)
         }
     }
+    ,
+    // Get top donors ranked by total donated amount (public)
+    getTopDonors: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const limitStr = (req.query?.limit as string) || '10'
+            const limit = Math.min(100, Math.max(1, Number(limitStr) || 10))
+
+            // Group donations by userId and sum amounts for registered donors only
+            const groups: any[] = await prisma.donation.groupBy({
+                by: ['userId'],
+                where: { userId: { not: null }, user: { type: 'DONOR' } },
+                _sum: { amount: true },
+                _count: { id: true },
+                orderBy: { _sum: { amount: 'desc' } },
+                take: limit
+            }) as any[]
+
+            const userIds = groups.map(g => g.userId).filter(Boolean as any)
+            const users = userIds.length ? await prisma.user.findMany({ where: { id: { in: userIds } }, select: { id: true, name: true } }) : []
+            const userMap: Record<string, any> = {}
+            users.forEach(u => { userMap[u.id] = u })
+
+            const transformed = groups.map((g, idx) => ({
+                rank: idx + 1,
+                userId: g.userId || null,
+                name: g.userId ? (userMap[g.userId]?.name || 'User') : 'Anonymous/Guest',
+                totalAmount: typeof g._sum.amount === 'bigint' ? Number(g._sum.amount) : Number(g._sum.amount || 0),
+                donationsCount: g._count?.id || 0
+            }))
+
+            return res.json({ ok: true, donors: transformed })
+        } catch (err) {
+            next(err)
+        }
+    }
 };
 
 export default donationController;

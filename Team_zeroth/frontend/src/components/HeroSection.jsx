@@ -21,8 +21,8 @@ const features = [
 ];
 
 const stats = [
-  { value: "Rs 1,50,000+", label: "Families Helped" },
-  { value: "Rs 25,00,000+", label: "Funds Shared Transparently" },
+  { value: "1000 +", label: "Families Helped" },
+  { value: "Rs 50,000+", label: "Funds Shared Transparently" },
   { value: "98%+", label: "Trusted Campaigns" },
 ];
 
@@ -65,12 +65,17 @@ const HeroSection = () => {
         <div className="absolute inset-0 bg-emerald-900/60" />
         <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-            From One Heart to Another, Nepal Rises Together.
+            Helping Nepal Rebuild Lives Together
+          <br />
+          <span className="block text-xl md:text-2xl font-medium text-emerald-200 mt-2">
+            When disaster strikes, hope is born from unity. <br />
+            Stand with families, restore dreams, and be the reason someone believes in tomorrow.
+          </span>
           </h1>
-          <p className="text-white/90 text-base md:text-lg mb-8 max-w-2xl mx-auto">
+          {/* <p className="text-white/90 text-base md:text-lg mb-8 max-w-2xl mx-auto">
             A community-powered platform helping families rebuild lives through
             trust, compassion, and collective support.
-          </p>
+          </p> */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={handleStartCampaign}
@@ -92,10 +97,10 @@ const HeroSection = () => {
       <section id="how-it-works" className="py-16 lg:py-24 bg-[#FBF7ED]">
         <div className="container mx-auto px-4 lg:px-8">
           <h2 className="text-2xl md:text-3xl font-bold text-center text-stone-800 mb-6">
-            Four simple steps to help your community
+            Four simple steps to help the ones in need
           </h2>
           <p className="text-center text-stone-600 mb-8 max-w-2xl mx-auto">
-            From sharing your story to making real impact — we guide you at every step.
+            From sharing your story to making real impact, we guide you at every step.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -148,9 +153,9 @@ const HeroSection = () => {
       {/* Stats */}
       <section className="py-16 lg:py-24 bg-emerald-800">
         <div className="container mx-auto px-4 lg:px-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-center text-white mb-12">
+          <h1 className="text-2xl md:text-3xl font-bold text-center text-white mb-12">
             Our Impact Across Nepal
-          </h2>
+          </h1>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {stats.map((stat) => (
               <div

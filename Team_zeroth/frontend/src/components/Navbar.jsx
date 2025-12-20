@@ -52,7 +52,7 @@ const Navbar = () => {
                         <img
                             src="/image.png"
                             alt="We Raise It"
-                            className="w-9 h-9 object-contain flex-shrink-0"
+                            className="w-19 h-19 object-contain flex-shrink-0"
                         />
                         <span className="text-emerald-800 font-semibold text-lg">
                             We Raise It

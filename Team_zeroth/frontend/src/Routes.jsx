@@ -85,7 +85,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: DASHBOARD_ROUTE,
-        element: isAuthenticated() ? <DashboardPage /> : <Navigate to={LOGIN_ROUTE} />
+        element: <DashboardPage />
       },
       {
         path: '/admin/dashboard',

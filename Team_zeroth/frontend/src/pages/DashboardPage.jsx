@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import useProfileCheck from '../hooks/useProfileCheck'
 import CampaignCard from '../components/campaigns/CampaignCard'
 import UserDonationsList from '../components/donation/UserDonationsList'
+import TopDonors from '../components/donation/TopDonors'
 
 const DashboardPage = () => {
   const { user, loading: profileLoading, campaigns: profileCampaigns = [] } = useProfileCheck()
@@ -31,6 +32,11 @@ const DashboardPage = () => {
           <h1 className="text-3xl font-bold">Welcome, {user?.name || 'Creator'}</h1>
           <p className="text-gray-600 mt-2">Your verified & live campaigns are shown below.</p>
         </div>
+
+          <section className="mb-12">
+            <h2 className="text-xl font-semibold mb-4">Top Donors</h2>
+            <TopDonors limit={10} />
+          </section>
 
         {user && String(user.type).toUpperCase() !== 'DONOR' && (
           <section className="mb-12">

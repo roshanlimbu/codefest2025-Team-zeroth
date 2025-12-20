@@ -7,5 +7,6 @@ const router = express.Router()
 router.post('/create', donationController.createDonation)
 router.get('/campaign/:id', donationController.getDonationsByCampaign)
 router.get('/user/:id', donationController.getDonationsByUser)
+router.get('/top-donors', donationController.getTopDonors)
 
 export default router

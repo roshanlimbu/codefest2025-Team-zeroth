@@ -17,6 +17,31 @@ const DonationProvider = ({ children, campaignData }) => {
     const locationStr = campaign.location || ''
     const [district = '', province = ''] = locationStr ? locationStr.split(',').map(s => s.trim()) : [ '', '' ]
 
+    // Normalize milestones and ensure numeric fields exist (target, achieved/raisedAmount)
+    const normalizedMilestones = (campaign.milestones || []).map((m) => {
+        const target = Number(m.target || m.fundTarget || 0)
+        const achieved = Number(m.raisedAmount || m.funded || 0)
+        const isCompleted = !!m.isCompleted || achieved >= target && target > 0
+        const status = isCompleted ? 'completed' : (achieved > 0 ? 'in-progress' : 'pending')
+        return {
+            id: m.id,
+            title: m.title || '',
+            description: m.description || '',
+            target,
+            achieved,
+            targetDate: m.targetDate ? String(m.targetDate) : null,
+            isCompleted,
+            status,
+        }
+    })
+
+    // Compute totals: prefer explicit campaign fields, fallback to sum of milestones
+    const sumTargets = normalizedMilestones.reduce((s, m) => s + (isNaN(m.target) ? 0 : m.target), 0)
+    const sumRaised = normalizedMilestones.reduce((s, m) => s + (isNaN(m.achieved) ? 0 : m.achieved), 0)
+
+    const campaignTotalTarget = Number(campaign.fundTarget ?? (sumTargets || 0))
+    const campaignTotalRaised = Number(campaign.fundRaised ?? (sumRaised || 0))
+
     const providerData = {
         campaign: {
             id: campaign.id,
@@ -25,8 +50,8 @@ const DonationProvider = ({ children, campaignData }) => {
             status: campaign.status || 'DRAFT',
             aiApproved: true,
             secureBlockchain: true,
-            totalTarget: Number(campaign.fundTarget || 0),
-            totalRaised: Number(campaign.fundRaised || 0),
+            totalTarget: campaignTotalTarget,
+            totalRaised: campaignTotalRaised,
             currency: "Rs",
             featured: true,
             district: district || campaign.district || 'Unknown',
@@ -36,7 +61,7 @@ const DonationProvider = ({ children, campaignData }) => {
         beneficiary,
         donationOptions: campaign.donationOptions || [],
         disaster: campaign.disaster || null,
-        milestones: campaign.milestones || [],
+        milestones: normalizedMilestones,
     }
 
     // Generate donation presets when none provided by campaign
@@ -102,8 +127,11 @@ const DonationProvider = ({ children, campaignData }) => {
         donationMessage,
         setDonationMessage,
 
-        // Computed values (guard division by zero)
-        fundingProgress: providerData.campaign.totalTarget > 0 ? (providerData.campaign.totalRaised / providerData.campaign.totalTarget) * 100 : 0,
+        // Computed values (guard division by zero).
+        // If no explicit target is set but there are raised funds, show full progress to indicate activity.
+        fundingProgress: providerData.campaign.totalTarget > 0
+            ? (providerData.campaign.totalRaised / providerData.campaign.totalTarget) * 100
+            : (providerData.campaign.totalRaised > 0 ? 100 : 0),
         remainingAmount: Math.max(0, providerData.campaign.totalTarget - providerData.campaign.totalRaised),
 
         // Actions

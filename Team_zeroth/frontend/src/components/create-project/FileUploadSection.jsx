@@ -84,7 +84,7 @@ const FileUploadSection = ({ uploadedFiles, errors, handleFileUpload, removeFile
         {/* AI Verification Progress */}
         {uploadedFiles.length > 0 && (
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">AI Verification Progress</label>
+            {/* <label className="block text-sm font-medium text-gray-700">AI Verification Progress</label> */}
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
                 className="bg-orange-500 h-2 rounded-full transition-all"

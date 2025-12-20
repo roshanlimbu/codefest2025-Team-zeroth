@@ -26,13 +26,10 @@ export const campaignController = {
                 return res.status(400).json({ error: 'Missing required fields: title, category, description' });
             }
 
-            // Safety: truncate overly long descriptions to avoid DB errors
-            // Trim and cap to 10000 chars as a safety net until schema migration is applied
             const description = String(rawDescription || '').trim();
             const MAX_DESCRIPTION = 10000;
             const safeDescription = description.length > MAX_DESCRIPTION ? description.slice(0, MAX_DESCRIPTION) : description;
 
-            // Normalize category from frontend-friendly values to Prisma enum
             const rawCat = String(category || '').trim().toLowerCase();
             const CATEGORY_MAP: Record<string, string> = {
                 medical: 'MEDICAL',
@@ -72,6 +69,18 @@ export const campaignController = {
             }
 
 
+            // Parse milestones from request
+            let parsedMilestones: any[] = [];
+            if (req.body.milestones) {
+                try {
+                    parsedMilestones = typeof req.body.milestones === 'string'
+                        ? JSON.parse(req.body.milestones)
+                        : req.body.milestones;
+                } catch (e) {
+                    return res.status(400).json({ error: 'Invalid milestones format. Expected array.' });
+                }
+            }
+
             const campaign = await prisma.campaign.create({
                 data: {
                     title,
@@ -90,6 +99,19 @@ export const campaignController = {
                             }))
                         }
                     }),
+                    ...(parsedMilestones.length > 0 && {
+                        milestones: {
+                            create: parsedMilestones.map((m: any) => ({
+                                userId: creatorId,
+                                title: m.title,
+                                description: m.description,
+                                targetDate: m.targetDate ? new Date(m.targetDate) : new Date(),
+                                target: BigInt(m.target || 0),
+                                raisedAmount: BigInt(m.raisedAmount || 0),
+                                isCompleted: !!m.isCompleted
+                            }))
+                        }
+                    })
                 },
                 include: {
                     links: true,
@@ -97,7 +119,14 @@ export const campaignController = {
                 }
             });
 
-            return res.status(201).json(campaign);
+            return res.status(201).json({
+                ...campaign,
+                milestones: (campaign.milestones || []).map(m => ({
+                    ...m,
+                    target: typeof m.target === 'bigint' ? Number(m.target) : m.target,
+                    raisedAmount: typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : m.raisedAmount
+                }))
+            });
         } catch (err) {
             next(err);
         }
@@ -153,7 +182,11 @@ export const campaignController = {
                     status: c.status,
                     createdAt: c.createdAt,
                     links: c.links || [],
-                    milestones: c.milestones || [],
+                    milestones: (c.milestones || []).map((m: any) => ({
+                        ...m,
+                        target: typeof m.target === 'bigint' ? Number(m.target) : m.target,
+                        raisedAmount: typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : m.raisedAmount,
+                    })),
                     creator: c.creator,
                     fundTarget,
                     fundRaised,
@@ -219,7 +252,11 @@ export const campaignController = {
                 status: campaign.status,
                 createdAt: campaign.createdAt,
                 links: campaign.links || [],
-                milestones: campaign.milestones || [],
+                milestones: (campaign.milestones || []).map((m: any) => ({
+                    ...m,
+                    target: typeof m.target === 'bigint' ? Number(m.target) : m.target,
+                    raisedAmount: typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : m.raisedAmount,
+                })),
                 creator: campaign.creator,
                 fundTarget,
                 fundRaised,
@@ -357,7 +394,15 @@ export const campaignController = {
                     status: c.status,
                     createdAt: c.createdAt,
                     links: c.links || [],
-                    milestones: c.milestones || [],
+                    milestones: (c.milestones || []).map((m: any) => ({
+                        ...m,
+                        target: typeof m.target === 'bigint' ? Number(m.target) : m.target,
+                        raisedAmount: typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : m.raisedAmount,
+                    })),
+                    donations: (c.donations || []).map((d: any) => ({
+                        ...d,
+                        amount: typeof d.amount === 'bigint' ? Number(d.amount) : d.amount,
+                    })),
                     creator: c.creator,
                     fundTarget,
                     fundRaised,
@@ -369,10 +414,8 @@ export const campaignController = {
             next(err);
         }
     },
-    // Admin: get all campaigns (no filtering) for moderation
     adminGetAllCampaigns: async (req: Request, res: Response, next: NextFunction) => {
         try {
-            // verify admin
             const sid = req.cookies?.[process.env.COOKIE_NAME ?? 'sid'];
             if (!sid) return res.status(401).json({ error: 'Not authenticated' });
             const session = await prisma.session.findUnique({ where: { id: sid }, include: { user: true } });
@@ -421,7 +464,15 @@ export const campaignController = {
                     status: c.status,
                     createdAt: c.createdAt,
                     links: c.links || [],
-                    milestones: c.milestones || [],
+                    milestones: (c.milestones || []).map((m: any) => ({
+                        ...m,
+                        target: typeof m.target === 'bigint' ? Number(m.target) : m.target,
+                        raisedAmount: typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : m.raisedAmount,
+                    })),
+                    donations: (c.donations || []).map((d: any) => ({
+                        ...d,
+                        amount: typeof d.amount === 'bigint' ? Number(d.amount) : d.amount,
+                    })),
                     creator: c.creator,
                     fundTarget,
                     fundRaised,

@@ -109,19 +109,19 @@ const OTPVerificationPage= () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         <div className="bg-white rounded-3xl p-8 shadow-2xl">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 rounded-full mb-4">
-              <Shield className="w-8 h-8 text-orange-500" />
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-100 rounded-full mb-4">
+              <Shield className="w-8 h-8 text-emerald-500" />
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Verify Your Email</h2>
             <p className="text-gray-500">
               We've sent a 6-digit code to
             </p>
-            <p className="text-orange-600 font-semibold mt-1">{email}</p>
+            <p className="text-emerald-600 font-semibold mt-1">{email}</p>
           </div>
 
           {/* Success Message */}
@@ -142,9 +142,9 @@ const OTPVerificationPage= () => {
 
           {/* Timer */}
           <div className="mb-6 text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-lg">
-              <Mail className="w-4 h-4 text-orange-600" />
-              <span className={`font-mono font-semibold ${timeLeft < 60 ? 'text-red-600' : 'text-orange-600'}`}>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-lg">
+              <Mail className="w-4 h-4 text-emerald-600" />
+              <span className={`font-mono font-semibold ${timeLeft < 60 ? 'text-red-600' : 'text-emerald-600'}`}>
                 {formatTime(timeLeft)}
               </span>
             </div>
@@ -164,7 +164,7 @@ const OTPVerificationPage= () => {
                   onKeyDown={(e) => handleKeyDown(index, e)}
                   onPaste={handlePaste}
                   disabled={isLoading}
-                  className="w-12 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition disabled:bg-gray-100"
+                  className="w-12 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition disabled:bg-gray-100"
                 />
               ))}
             </div>
@@ -172,7 +172,7 @@ const OTPVerificationPage= () => {
             <button
               onClick={handleSubmit}
               disabled={isLoading || timeLeft === 0}
-              className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              className="w-full bg-emerald-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
@@ -188,7 +188,7 @@ const OTPVerificationPage= () => {
               Didn't receive the code?{' '}
               <button
                 onClick={() => navigate('/signup')}
-                className="text-orange-500 hover:text-orange-600 font-semibold"
+                className="text-emerald-800 hover:text-emerald-600 font-semibold"
               >
                 Register again
               </button>

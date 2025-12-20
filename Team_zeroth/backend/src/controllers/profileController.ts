@@ -77,7 +77,14 @@ export const getProfile = async (req: Request, res: Response, next: NextFunction
             };
         });
 
-        return res.json({ ok: true, user, campaigns: transformed });
+        const payload = { ok: true, user, campaigns: transformed };
+
+        // Safely serialize BigInt values (Prisma may return BigInt for IDs/amounts)
+        const safe = JSON.parse(JSON.stringify(payload, (_key, value) =>
+            typeof value === 'bigint' ? value.toString() : value
+        ));
+
+        return res.json(safe);
     } catch (err) {
         next(err);
     }

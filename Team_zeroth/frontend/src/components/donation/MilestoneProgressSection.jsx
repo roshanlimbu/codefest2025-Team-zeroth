@@ -51,7 +51,7 @@ const MilestoneProgressSection = () => {
 
         <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
           <div
-            className="bg-gradient-to-r from-orange-500 to-orange-400 h-full rounded-full transition-all duration-500"
+            className="bg-gradient-to-r from-emerald-700 to-emerald-800 h-full rounded-full transition-all duration-500"
             style={{ width: `${fundingProgress}%` }}
           />
         </div>
@@ -83,8 +83,8 @@ const MilestoneProgressSection = () => {
               {milestone.status === "in-progress" && (
                 <div className="mt-2 w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                   <div
-                    className="bg-orange-500 h-full rounded-full transition-all duration-500"
-                    style={{ width: `${(milestone.achieved / milestone.target) * 100}%` }}
+                    className="bg-emerald-700 h-full rounded-full transition-all duration-500"
+                    style={{ width: `${milestone.target && milestone.target > 0 ? Math.min(100, (milestone.achieved / milestone.target) * 100) : (milestone.achieved > 0 ? 100 : 0)}%` }}
                   />
                 </div>
               )}

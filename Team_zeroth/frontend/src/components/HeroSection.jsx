@@ -31,7 +31,7 @@ const HeroSection = () => {
   const navigate = useNavigate();
 
   const isAuthenticated = true; // temp local
-  const userRole = "creator";   // temp local
+  const userRole = "";   // temp local
 
   const handleStartCampaign = () => {
     if (!isAuthenticated) {
@@ -40,11 +40,7 @@ const HeroSection = () => {
       return;
     }
 
-    if (userRole !== "creator") {
-      alert("Only verified campaign creators can start a campaign.");
-      return;
-    }
-
+ 
     navigate(CAMPAIGN_CREATE_ROUTE);
   };
 

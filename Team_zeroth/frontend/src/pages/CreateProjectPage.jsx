@@ -173,6 +173,16 @@ const CreateProjectPage = () => {
         if (f.file) form.append('media', f.file)
       })
 
+      // Attach milestones as JSON string
+      form.append('milestones', JSON.stringify(
+        milestones.map(m => ({
+          title: m.title,
+          description: m.description,
+          targetDate: m.targetDate,
+          target: m.estimatedCost
+        }))
+      ))
+
       const resp = await axiosClient.post('/api/campaigns/createcampaign', form, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })

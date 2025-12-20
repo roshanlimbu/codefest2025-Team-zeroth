@@ -207,8 +207,9 @@ export const auth = {
 
             res.cookie(COOKIE_NAME, sessionId, {
                 httpOnly: true,
-                sameSite: 'strict',
-                secure: false,
+                // Use 'lax' to be accepted by browsers in dev without requiring Secure
+                sameSite: 'lax',
+                secure: process.env.NODE_ENV === 'production',
                 maxAge: SESSION_TTL_MINUTES * 60 * 1000,
                 path: '/',
             });
@@ -241,9 +242,10 @@ export const auth = {
 
             res.cookie(COOKIE_NAME, '', {
                 httpOnly: true,
-                sameSite: 'none',
-                secure: false,
+                sameSite: 'lax',
+                secure: process.env.NODE_ENV === 'production',
                 maxAge: 0,
+                path: '/',
             });
 
             return res.json({ message: 'Logged out' });

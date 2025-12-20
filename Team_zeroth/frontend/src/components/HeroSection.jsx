@@ -1,4 +1,5 @@
 import { Cpu, Link2, Award, CheckSquare } from "lucide-react";
+import AboutUs from "./AboutUs";
 import { useNavigate } from "react-router-dom";
 import { CAMPAIGN_CREATE_ROUTE, CAMPAIGN_ROUTE, LOGIN_ROUTE } from "../constant/routes";
 
@@ -72,10 +73,6 @@ const HeroSection = () => {
             Stand with families, restore dreams, and be the reason someone believes in tomorrow.
           </span>
           </h1>
-          {/* <p className="text-white/90 text-base md:text-lg mb-8 max-w-2xl mx-auto">
-            A community-powered platform helping families rebuild lives through
-            trust, compassion, and collective support.
-          </p> */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={handleStartCampaign}
@@ -92,6 +89,7 @@ const HeroSection = () => {
           </div>
         </div>
       </section>
+
 
       {/* Features */}
       <section id="how-it-works" className="py-16 lg:py-24 bg-[#FBF7ED]">

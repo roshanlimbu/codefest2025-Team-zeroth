@@ -12,7 +12,7 @@ const navMenu = [
     { route: HOME_ROUTE, label: "Home" },
     { route: HOW_IT_WORKS_ROUTE, label: "How it Works" },
     { route: TRANSPARENCY_ROUTE, label: "Transparency" },
-    { route: ABOUT_ROUTE, label: "About Us" },
+    // { route: ABOUT_ROUTE, label: "About Us" }, // Removed About Us link
     { route: CONTACT_ROUTE, label: "Contact" },
 ];
 

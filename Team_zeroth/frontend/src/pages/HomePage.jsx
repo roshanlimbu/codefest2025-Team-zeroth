@@ -2,6 +2,8 @@
 import React from "react";
 import HeroSection from "../components/HeroSection";
 import TopDonors from "../components/donation/TopDonors";
+import AboutUs from "../components/AboutUs";
+
 
 const HomePage = () => {
   return (
@@ -47,6 +49,13 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+      
+
+      {/* About Us Section (new) */}
+      <div className="p-4 text-center">
+        <AboutUs />
+      </div>
+      
     </div>
   );
 };

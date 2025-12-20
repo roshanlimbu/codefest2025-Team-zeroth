@@ -116,7 +116,7 @@ const donationController = {
 
             const donations: any[] = await prisma.donation.findMany({
                 where: { userId: userIdStr },
-                include: { campaign: { select: { id: true, title: true } } },
+                include: { campaign: { include: { milestones: true }, select: { id: true, title: true, milestones: true } } },
                 orderBy: { createdAt: 'desc' }
             }) as any
 
@@ -128,6 +128,13 @@ const donationController = {
                 createdAt: d.createdAt,
                 campaignId: d.campaign ? d.campaign.id : null,
                 campaignTitle: d.campaign ? d.campaign.title : null,
+                campaignMilestones: (d.campaign && Array.isArray(d.campaign.milestones)) ? d.campaign.milestones.map((m: any) => ({
+                    id: m.id,
+                    title: m.title,
+                    target: typeof m.target === 'bigint' ? Number(m.target) : Number(m.target || 0),
+                    raisedAmount: typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : Number(m.raisedAmount || 0),
+                    isFulfilled: (typeof m.target === 'bigint' ? Number(m.target) : Number(m.target || 0)) <= (typeof m.raisedAmount === 'bigint' ? Number(m.raisedAmount) : Number(m.raisedAmount || 0)) || !!m.isCompleted
+                })) : []
             }))
 
             return res.json({ ok: true, donations: transformed })

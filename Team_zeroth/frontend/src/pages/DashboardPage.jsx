@@ -47,7 +47,7 @@ const DashboardPage = () => {
             ) : (
               <div className="bg-white rounded-lg border border-dashed border-gray-200 p-8 text-center">
                 <p className="text-gray-700 mb-4">You don't have any Live campaigns yet.</p>
-                <p className="text-sm text-gray-500">Create a campaign and submit it for review. Once approved and set to Live by an admin, it will appear here.</p>
+                <p className="text-sm text-gray-500">Create a campaign and submit it for review. Once approved and set to "Live" by an admin, it will appear here.</p>
               </div>
             )}
           </section>
